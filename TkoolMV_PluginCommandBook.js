@@ -55,6 +55,22 @@
  *  名前の変更 2 \V[1]　　　（アクター0002の名前を変数0001の内容に変更
  *
  * ===========================================================================
+ * 呼び出し元アイテム取得
+ *  コモンイベントを呼び出したアイテムのIDを変数に入れる
+ *  製作者 Alec
+ *
+ *  使用例
+ *  呼び出し元アイテム取得 1　　（変数0001にコモンイベントを呼び出したアイテムIDを入れる
+ *
+ * ===========================================================================
+ * 呼び出し元スキル取得
+ *  コモンイベントを呼び出したスキルのIDを変数に入れる
+ *  製作者 Alec
+ *
+ *  使用例
+ *  呼び出し元スキル取得 1　　（変数0001にコモンイベントを呼び出したスキルIDを入れる
+ *
+ * ===========================================================================
  *
  */
 
@@ -135,6 +151,47 @@
                 var actorId = args[0]; // アクターID
                 var name = args[1]; // 名前
                 $gameActors.actor(actorId).setName(name);
+            },
+
+            /**
+             * 呼び出し元アイテム取得
+             *  コモンイベントを呼び出したアイテムのIDを変数に入れる
+             *  製作者 Alec
+             *
+             *  使用例
+             *  呼び出し元アイテム取得 1　　（変数0001にコモンイベントを呼び出したアイテムIDを入れる
+             */
+            '呼び出し元アイテム取得' : function() {
+                var varId = parseInt(args[0]); // 変数ID
+
+                // アイテムを使ってなかったら
+                if (!$gameParty.lastItem()) {
+                    return;
+                }
+                $gameVariables.setValue(varId, $gameParty.lastItem().id);
+            },
+
+            /**
+             * 呼び出し元スキル取得
+             *  コモンイベントを呼び出したスキルのIDを変数に入れる
+             *  製作者 Alec
+             *
+             *  使用例
+             *  呼び出し元スキル取得 1　　（変数0001にコモンイベントを呼び出したスキルIDを入れる
+             */
+            '呼び出し元スキル取得' : function() {
+                if (eval(String(parameters['呼び出し元スキルの記録を使わない']||'false'))) {
+                    window.alert("「呼び出し元スキル取得」を使うにはプラグインマネージャーから「TkoolMV_PluginCommandBook.js」の「呼び出し元スキルの記録を使わない」を「はい」してください");
+                    return;
+                }
+                var varId = parseInt(args[0]); // 変数ID
+                var skillId = 0;
+                if ($gameParty.inBattle()) {
+                    skillId = BattleManager._subject.lastBattleSkill().id;
+                } else {
+                    skillId = $gameParty.menuActor().lastMenuSkill().id;
+                }
+                $gameVariables.setValue(varId, skillId);
             },
 
         };
