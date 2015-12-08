@@ -71,6 +71,20 @@
  *  呼び出し元スキル取得 1　　（変数0001にコモンイベントを呼び出したスキルIDを入れる
  *
  * ===========================================================================
+ * レベルの変更
+ *  アクターのレベルを変更します。増減ではなく変更後のレベルを指定できます。
+ *  製作者 Alec
+ *
+ *  パラメータ
+ *  　アクターのID（もし0なら全員）
+ *    変更後のレベル
+ *    レベルアップをメッセージで表示するかどうか（表示・非表示）
+ *
+ *  使用例
+ *  レベルの変更 1 50 表示　　（アクター0001のレベルを50に変更
+ *  レベルの変更 0 10 非表示　（仲間全員のレベルを10に変更、レベルアップは表示しない
+ *
+ * ===========================================================================
  *
  */
 
@@ -192,6 +206,41 @@
                     skillId = $gameParty.menuActor().lastMenuSkill().id;
                 }
                 $gameVariables.setValue(varId, skillId);
+            },
+
+            /**
+             * レベルの変更
+             *  アクターのレベルを変更します。増減ではなく変更後のレベルを指定できます。
+             *  製作者 Alec
+             *
+             *  パラメータ
+             *  　アクターのID（もし0なら全員）
+             *    変更後のレベル
+             *    レベルアップをメッセージで表示するかどうか（表示・非表示）
+             *
+             *  使用例
+             *  レベルの変更 1 50 表示　　（アクター0001のレベルを50に変更
+             *  レベルの変更 0 10 非表示　（仲間全員のレベルを10に変更、レベルアップは表示しない
+             */
+            'レベルの変更' : function() {
+                var actorId = parseInt(args[0], 10);
+                var level = parseInt(args[1], 10) || 1;
+                var show = {"表示":true,"非表示":false,"はい":true,"いいえ":false}[args[2]||'表示'];
+                show = show === null ? false : show;
+                console.log(show);
+                if (actorId == 0) {
+                    $gameParty.members().forEach(function(actor){
+                        var exp = actor.expForLevel(level);
+                        actor.changeExp(exp, show);
+                    });
+                } else {
+                    var actor = $gameActors.actor(actorId);
+                    if (!actor) {
+                        return;
+                    }
+                    var exp = actor.expForLevel(level);
+                    actor.changeExp(exp, show);
+                }
             },
 
         };
