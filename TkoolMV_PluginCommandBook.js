@@ -12,10 +12,11 @@
  * @plugindesc プラグインコマンド集
  * @author 有志の皆さん
  *
- * @param Dummy
- * @desc まだ設定の必要なコマンドがないので。作ったら消してね
- * Default: 1
- * @default 1
+ * @param 制御文字の拡張
+ * @desc このプラグインで使えるパラメータの制御文字を
+ * 通常のメッセージなどで使用できるようにするか(はい/いいえ)
+ * Default: はい
+ * @default はい
  *
  * @help
  *  Copyright (c) 2015 Alec
@@ -103,6 +104,8 @@
         return text;
     };
 
+    var parameters = PluginManager.parameters('TkoolMV_PluginCommandBook');
+
     var _Game_Interpreter_pluginCommand      = Game_Interpreter.prototype.pluginCommand;
     Game_Interpreter.prototype.pluginCommand = function (command, args) {
         _Game_Interpreter_pluginCommand.call(this, command, args);
@@ -144,5 +147,27 @@
         // コマンドの実行
         commandMap[command]();
     };
+
+    /*
+     * ここからはプラグインコマンドの実装のために必要な関数などを追加する
+     */
+    var はい = true;
+    var いいえ = false;
+
+    /*
+     * 制御文字の拡張
+     *  このプラグインで使っている制御文字の拡張を通常のウィンドウにも適用します
+     *  製作者 Alec
+     */
+    console.log(eval(String(parameters['制御文字の拡張']||'false')));
+    if (eval(String(parameters['制御文字の拡張']||'false'))) {
+        (function () {
+            var Window_Base_convertEscapeCharacters = Window_Base.prototype.convertEscapeCharacters;
+            Window_Base.prototype.convertEscapeCharacters = function(text) {
+                text = unescape(text);
+                return Window_Base_convertEscapeCharacters.call(this, text);
+            };
+        })();
+    }
 
 })();
