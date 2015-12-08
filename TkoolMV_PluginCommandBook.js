@@ -33,6 +33,7 @@
  * ■パラメータについて
  * プラグインコマンドの右に空白をつけてパラメータを追記することができます。
  * パラメータは数字、英数字、日本語、記号など以外にも以下の制御文字が使えます
+ * （各数字部分には全角数字も使えます）
  * \V[n] 変数n番目の値に置き換えられます
  * \N[n] アクターn番の名前に置き換えられます
  * \P[n] パーティメンバーn番の値に置き換えられます
@@ -59,30 +60,43 @@
 
 (function(){
 
+    /*
+     * 全角数字を半角数字に変換する
+     */
+    var wstringToString = function(text) {
+        text = text.replace(/[０-９]/g, function(c) {
+            return String.fromCharCode(c.charCodeAt(0) - 0xFEE0);
+        });
+        return text;
+    }
+
+    /*
+     * 制御文字の拡張
+     */
     var unescape = function(text) {
         var prevText = "";
         text = text.replace(/\\/g, '\x1b');
         while (prevText != text) {
             prevText = text;
             text = text.replace(/\x1b\x1b/g, '\\');
-            text = text.replace(/\x1bV\[(\d+)\]/gi, function() {
-                return $gameVariables.value(parseInt(arguments[1]));
+            text = text.replace(/\x1bV\[([０-９\d]+)\]/gi, function() {
+                return $gameVariables.value(parseInt(wstringToString(arguments[1]), 10));
             }.bind(this));
-            text = text.replace(/\x1bN\[(\d+)\]/gi, function() {
-                return this.actorName(parseInt(arguments[1]));
+            text = text.replace(/\x1bN\[([０-９\d]+)\]/gi, function() {
+                return this.actorName(parseInt(wstringToString(arguments[1]), 10));
             }.bind(this));
-            text = text.replace(/\x1bP\[(\d+)\]/gi, function() {
-                return this.partyMemberName(parseInt(arguments[1]));
+            text = text.replace(/\x1bP\[([０-９\d]+)\]/gi, function() {
+                return this.partyMemberName(parseInt(wstringToString(arguments[1]), 10));
             }.bind(this));
             text = text.replace(/\x1bG/gi, TextManager.currencyUnit);
-            text = text.replace(/\x1bIn\[(\d+)\]/gi, function() {
-                return $dataItems[parseInt(arguments[1], 10)].name;
+            text = text.replace(/\x1bIn\[([０-９\d]+)\]/gi, function() {
+                return $dataItems[parseInt(wstringToString(arguments[1]), 10)].name;
             }.bind(this));
-            text = text.replace(/\x1bIp\[(\d+)\]/gi, function() {
-                return $dataItems[parseInt(arguments[1], 10)].price;
+            text = text.replace(/\x1bIp\[([０-９\d]+)\]/gi, function() {
+                return $dataItems[parseInt(wstringToString(arguments[1]), 10)].price;
             }.bind(this));
-            text = text.replace(/\x1bSn\[(\d+)\]/gi, function() {
-                return $dataSkills[parseInt(arguments[1], 10)].name;
+            text = text.replace(/\x1bSn\[([０-９\d]+)\]/gi, function() {
+                return $dataSkills[parseInt(wstringToString(arguments[1]), 10)].name;
             }.bind(this));
         }
         text = text.replace(/\x1bG/gi, TextManager.currencyUnit);
