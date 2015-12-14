@@ -85,9 +85,133 @@
  *  レベルの変更 0 10 非表示　（仲間全員のレベルを10に変更、レベルアップは表示しない
  *
  * ===========================================================================
+ * バイブレーション(English:Vibration)
+ *  実行中のAndroid端末を振動させます。
+ *  製作者 トリアコンタン
  *
+ *  パラメータ
+ *  　振動するフレーム数(1/60秒単位)
+ *    振動が完了するまでウェイト(ウェイトあり or ウェイトなし)
+ *    　デフォルトは「ウェイトなし」
+ *
+ *  使用例
+ *  バイブレーション 60 ウェイトあり
+ *  Vibration 120
+ * ===========================================================================
+ * 指定位置の通行情報取得(English:Get_Location_Pass)
+ *  指定した座標のマップ通行情報を取得して、変数に格納します。
+ *  製作者 トリアコンタン
+ *
+ *  以下の法則に従って格納されます。
+ *  上方向へ通行可能：千の位が 1、上方向へ通行不可能：千の位が 0
+ *  右方向へ通行可能：百の位が 1、右方向へ通行不可能：百の位が 0
+ *  下方向へ通行可能：十の位が 1、下方向へ通行不可能：十の位が 0
+ *  左方向へ通行可能：一の位が 1、左方向へ通行不可能：一の位が 0
+ *
+ *  パラメータ
+ *  　結果を格納する変数の番号
+ *    X座標
+ *    Y座標
+ *
+ *  使用例
+ *  指定位置の通行情報取得 1 17 13
+ *  Get_Location_Pass 2 \V[1] \V[2]
+ * ===========================================================================
+ * 変数の初期化(English:Init_Variables)
+ *  全ての変数を初期化します。（例外指定可能）
+ *  製作者 トリアコンタン
+ *
+ *  パラメータ
+ *  　初期化したくない変数番号（半角スペースで区切って複数指定可能）
+ *
+ *  使用例
+ *  変数の初期化
+ *  Init_Variables 1 2 \V[3]
+ * ===========================================================================
+ * スイッチの初期化(English:Init_Switches)
+ *  全てのスイッチを初期化します。（例外指定可能）
+ *  製作者 トリアコンタン
+ *
+ *  パラメータ
+ *  　初期化したくないスイッチ番号（半角スペースで区切って複数指定可能）
+ *
+ *  使用例
+ *  スイッチの初期化
+ *  Init_Switches 1 2 \V[3]
+ * ===========================================================================
+ * セルフスイッチの初期化(English:Init_Self_Switch)
+ *  全てのセルフスイッチを初期化します。
+ *  製作者 トリアコンタン
+ *
+ *  パラメータ
+ *  　なし
+ *
+ *  使用例
+ *  セルフスイッチの初期化
+ *  Init_Self_Switch
+ * ===========================================================================
+ * セルフスイッチの遠隔操作(English:Remote_Control_Self_Switch)
+ *  マップID、イベントID、種別（A, B, C, D）を指定してセルフスイッチを操作します。
+ *  製作者 トリアコンタン
+ *
+ *  パラメータ
+ *  　マップID
+ *  　イベントID
+ *  　種別（A, B, C, D）
+ *  　設定値（ON or OFF）
+ *
+ *  使用例
+ *  セルフスイッチの遠隔操作 1 3 A ON
+ *  Remote_Control_Self_Switch 1 3 D OFF
+ * ===========================================================================
+ * ピクチャの読み込み(English:Load_Picture)
+ *  指定したファイル名のピクチャを事前に読み込んでキャッシュに保存します。
+ *  製作者 トリアコンタン
+ *
+ *  パラメータ
+ *  　ファイル名（拡張子は指定しないでください）
+ *
+ *  使用例
+ *  ピクチャの読み込み filename
+ *  Load_Picture filename
+ * ===========================================================================
+ * 戦闘アニメの読み込み(English:Load_Animation)
+ *  指定したファイル名の戦闘アニメを事前に読み込んでキャッシュに保存します。
+ *  製作者 トリアコンタン
+ *
+ *  パラメータ
+ *  　ファイル名（拡張子は指定しないでください）
+ *  　色相（0-360）
+ *
+ *  使用例
+ *  戦闘アニメの読み込み filename
+ *  Load_Animation filename
+ * ===========================================================================
+ * シャットダウン(English:Shutdown)
+ *  ゲームウィンドウを閉じて強制終了します。
+ *  この操作はブラウザ実行、スマホ実行では無効です。
+ *  製作者 トリアコンタン
+ *
+ *  パラメータ
+ *  　なし
+ *
+ *  使用例
+ *  シャットダウン
+ *  Shutdown
+ * ===========================================================================
+ * ウェブサイト起動(English:Startup_Website)
+ *  別ウィンドウで指定されたURLのウェブサイトを起動します。
+ *  この操作はブラウザ実行、スマホ実行では無効です。
+ *  製作者 トリアコンタン
+ *
+ *  パラメータ
+ *  　なし
+ *
+ *  使用例
+ *  ウェブサイト起動 https://www.google.co.jp/
+ *  Startup_Website https://www.google.co.jp/
+ * ===========================================================================
  */
-
 
 (function(){
 
@@ -99,7 +223,7 @@
             return String.fromCharCode(c.charCodeAt(0) - 0xFEE0);
         });
         return text;
-    }
+    };
 
     /*
      * 制御文字の拡張
@@ -114,10 +238,10 @@
                 return $gameVariables.value(parseInt(wstringToString(arguments[1]), 10));
             }.bind(this));
             text = text.replace(/\x1bN\[([０-９\d]+)\]/gi, function() {
-                return this.actorName(parseInt(wstringToString(arguments[1]), 10));
+                return actorName(parseInt(wstringToString(arguments[1]), 10));
             }.bind(this));
             text = text.replace(/\x1bP\[([０-９\d]+)\]/gi, function() {
-                return this.partyMemberName(parseInt(wstringToString(arguments[1]), 10));
+                return partyMemberName(parseInt(wstringToString(arguments[1]), 10));
             }.bind(this));
             text = text.replace(/\x1bG/gi, TextManager.currencyUnit);
             text = text.replace(/\x1bIn\[([０-９\d]+)\]/gi, function() {
@@ -132,6 +256,16 @@
         }
         text = text.replace(/\x1bG/gi, TextManager.currencyUnit);
         return text;
+    };
+
+    var actorName = function(n) {
+        var actor = n >= 1 ? $gameActors.actor(n) : null;
+        return actor ? actor.name() : '';
+    };
+
+    var partyMemberName = function(n) {
+        var actor = n >= 1 ? $gameParty.members()[n - 1] : null;
+        return actor ? actor.name() : '';
     };
 
     var parameters = PluginManager.parameters('TkoolMV_PluginCommandBook');
@@ -243,6 +377,113 @@
                 }
             },
 
+            'バイブレーション' : function() {
+                if(typeof navigator !== 'undefined' && navigator.vibrate) {
+                    var time = Math.floor(args[0] * 60 / 1000);
+                    navigator.vibrate(time);
+                    if (args[1] === 'ウェイトあり') this.wait(time);
+                }
+            },
+            'Vibration' : function() {
+                commandMap['バイブレーション']();
+            },
+
+            '指定位置の通行判定取得' : function() {
+                var x = parseInt(args[1], 10);
+                var y = parseInt(args[2], 10);
+                var value = 0;
+                value += $gamePlayer.isMapPassable(x, y, 8) ? 1000 : 0;
+                value += $gamePlayer.isMapPassable(x, y, 6) ? 100  : 0;
+                value += $gamePlayer.isMapPassable(x, y, 2) ? 10   : 0;
+                value += $gamePlayer.isMapPassable(x, y, 4) ? 1    : 0;
+                $gameVariables.setValue(args[0], value);
+            },
+            'Get_Location_Pass' : function() {
+                commandMap['指定位置の通行判定取得']();
+            },
+
+            'スイッチの初期化' : function() {
+                var exceptionValues = [];
+                args.forEach(function(arg) {
+                    arg = parseInt(arg, 10);
+                    exceptionValues[arg] = $gameSwitches.value(arg);
+                });
+                $gameSwitches.clear();
+                args.forEach(function(arg) {
+                    arg = parseInt(arg, 10);
+                    $gameSwitches.setValue(arg, exceptionValues[arg]);
+                });
+            },
+            'Init_Switches' : function() {
+                commandMap['スイッチの初期化']();
+            },
+
+            '変数の初期化' : function() {
+                var exceptionValues = [];
+                args.forEach(function(arg) {
+                    arg = parseInt(arg, 10);
+                    exceptionValues[arg] = $gameVariables.value(arg);
+                });
+                $gameVariables.clear();
+                args.forEach(function(arg) {
+                    arg = parseInt(arg, 10);
+                    $gameVariables.setValue(arg, exceptionValues[arg]);
+                });
+            },
+            'Init_Variables' : function() {
+                commandMap['変数の初期化']();
+            },
+
+            'セルフスイッチの初期化' : function() {
+                $gameSelfSwitches.clear();
+            },
+            'Init_Self_Switch' : function() {
+                commandMap['セルフスイッチの初期化']();
+            },
+
+            'セルフスイッチの遠隔操作' : function() {
+                var mapId   = Math.max(parseInt(args[0], 10), 1);
+                var eventId = Math.max(parseInt(args[1], 10), 1);
+                var type  = args[2].toUpperCase();
+                var value = args[3].toUpperCase();
+                $gameSelfSwitches.setValue([mapId, eventId, type], value === 'ON');
+            },
+            'Remote_Control_Self_Switch' : function() {
+                commandMap['セルフスイッチの遠隔操作']();
+            },
+
+            'ピクチャの読み込み' : function() {
+                ImageManager.loadPicture(args[0], 0);
+            },
+            'Load_Picture' : function() {
+                commandMap['ピクチャの読み込み']();
+            },
+
+            '戦闘アニメの読み込み' : function() {
+                var hue = parseInt(args[1], 10).clamp(0, 360);
+                ImageManager.loadAnimation(args[0], hue);
+            },
+            'Load_Animation' : function() {
+                commandMap['戦闘アニメの読み込み']();
+            },
+
+            'シャットダウン' : function() {
+                if (Utils.isNwjs()) require('nw.gui').Window.get().close();
+            },
+            'Shutdown' : function() {
+                commandMap['シャットダウン']();
+            },
+
+            'ウェブサイト起動' : function() {
+                if (Utils.isNwjs()) {
+                    var newWindow = require('nw.gui').Window.open(args[0]);
+                    newWindow.moveTo(0, 0);
+                    newWindow.resizeTo(Graphics.width, Graphics.height);
+                }
+            },
+            'Startup_Website' : function() {
+                commandMap['ウェブサイト起動']();
+            },
         };
 
         // コマンドチェック
@@ -251,7 +492,21 @@
         }
 
         // コマンドの実行
-        commandMap[command]();
+        try {
+            commandMap[command]();
+        } catch (e) {
+            if ($gameTemp.isPlaytest() && Utils.isNwjs()) {
+                var window = require('nw.gui').Window.get();
+                var devTool = window.showDevTools();
+                devTool.moveTo(0, 0);
+                devTool.resizeTo(Graphics.width, Graphics.height);
+                window.focus();
+            }
+            console.log('プラグインコマンドの実行中にエラーが発生しました。');
+            console.log('- コマンド名 　: ' + command);
+            console.log('- コマンド引数 : ' + args);
+            console.log('- エラー原因   : ' + e.toString());
+        }
     };
 
     /*
