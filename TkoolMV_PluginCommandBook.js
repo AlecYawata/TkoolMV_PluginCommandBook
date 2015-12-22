@@ -211,6 +211,27 @@
  *  ウェブサイト起動 https://www.google.co.jp/
  *  Startup_Website https://www.google.co.jp/
  * ===========================================================================
+ * 変数の操作(English:ControlVariabl)
+ * 指定の変数の値を操作(代入、加算、減算、乗算、除算、剰余)します。
+ * 変数の指定について、イベントエディタのコマンドと同じ#0001なども使用できます。
+ * プラグインコマンドで[変数の操作]もしくは[ControlVariabl]か[ConVar]を記述して使用します。
+ * 
+ * パラメータ：
+ *  引数1：操作する変数
+ *  引数2：操作する内容 [代入：=  加算:+=  減算：-=  乗算：*=  除算：/=  剰余：%=]
+ *                                                or
+ *                     [代入：set  加算:add  減算：sub  乗算：mult  除算：div  剰余：mod]
+ *  引数3：操作用の値
+ * 
+ * 使用例：
+ *   変数の操作 #0001 += \V[2] //変数1に変数2の値を加算
+ *   変数の操作 \V[2] = \V[3]  //変数2の値と同番号の変数に変数3の値を代入
+ *   変数の操作 1 mod \V[2]    //変数1を変数2の値で除算した余りを代入
+ *   変数の操作 1 = \In[\V[2]] //変数1に変数2のアイテム番号の名前を代入
+ *   ControlVariable 1 += 2   //変数1に2を加算
+ *   ConVar 1 mult \V[5]      //変数1を変数5の値で乗算
+ *
+ * ===========================================================================
  */
 
 (function(){
@@ -484,6 +505,48 @@
             'Startup_Website' : function() {
                 commandMap['ウェブサイト起動']();
             },
+            
+            '変数の操作' : function() {
+                args[0]=args[0].replace('#' ,'');
+                var VarId1   = parseInt(args[0],10);
+                var Var1 = args[2];
+                var Var2 = $gameVariables.value(VarId1);
+                if (!isFinite(VarId1)) return;
+                args[1]=args[1].replace('set','=');
+                args[1]=args[1].replace('add','+=');
+                args[1]=args[1].replace('sub','-=');
+                args[1]=args[1].replace('mult','*=');
+                args[1]=args[1].replace('div','/=');
+                args[1]=args[1].replace('mod','%=');   
+                if (args[1]=='=') {
+                    $gameVariables.setValue(VarId1,Var1);
+                }
+                if (!isFinite(Var1)) return;
+                if (!isFinite(Var2)) return;
+                Var1 = parseInt(Var1,10);
+                Var2 = parseInt(Var2,10);
+                if (args[1]=='+=') {
+                   $gameVariables.setValue(VarId1,Var2+Var1);
+                }
+                if (args[1]=='-=') {
+                   $gameVariables.setValue(VarId1,Var2-Var1);
+                }
+                if (args[1]=='*=') {
+                   $gameVariables.setValue(VarId1,Var2*Var1);
+                }
+                if (args[1]=='/=') {
+                   $gameVariables.setValue(VarId1,(Var2-(Var2%Var1))/Var1);
+                }
+                if (args[1]=='%=') {
+                   $gameVariables.setValue(VarId1,Var2%Var1);
+                }
+            },
+            'ControlVariable' : function() {
+                commandMap['変数の操作']();
+            },
+            'ConVar' : function() {
+                commandMap['変数の操作']();
+            }, 
         };
 
         // コマンドチェック
