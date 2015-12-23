@@ -205,7 +205,11 @@
  *  製作者 トリアコンタン
  *
  *  パラメータ
- *  　なし
+ *  　表示したいサイトのURL
+ *  　ウィンドウのX座標（指定しなかった場合は0）
+ *  　ウィンドウのY座標（指定しなかった場合は0）
+ *  　ウィンドウの横幅（指定しなかった場合はゲーム画面と同じサイズ）
+ *  　ウィンドウの高さ（指定しなかった場合はゲーム画面と同じサイズ）
  *
  *  使用例
  *  ウェブサイト起動 https://www.google.co.jp/
@@ -231,6 +235,77 @@
  *   ControlVariable 1 += 2   //変数1に2を加算
  *   ConVar 1 mult \V[5]      //変数1を変数5の値で乗算
  *
+ * ===========================================================================
+ * タッチ座標の取得(English:Get_Touch_Info)
+ *  タッチ位置のX座標とY座標を指定された変数に格納します。
+ *  画面上の実座標とマップ上のタイル座標の二種類が取得できます。
+ *  製作者 トリアコンタン
+ *
+ *  パラメータ
+ *  　X座標が格納される変数の番号
+ *  　Y座標が格納される変数の番号
+ *  　取得タイプ（画面座標 or マップ座標）※指定しない場合は画面座標
+ *
+ *  使用例
+ *  タッチ座標の取得 1 2
+ *  Get_Touch_Info \V[1] \V[2] マップ座標
+ * ===========================================================================
+ * マップタッチ禁止の変更(English:Change_Map_Touch)
+ *  マップタッチによるプレイヤーの移動禁止を変更します。
+ *  製作者 トリアコンタン
+ *
+ *  パラメータ
+ *  　設定値（禁止 or 許可）
+ *
+ *  使用例
+ *  マップタッチ禁止の変更 禁止
+ *  Change_Map_Touch 許可
+ * ===========================================================================
+ * マップタッチ移動中判定(English:Get_Map_Touch_Moving)
+ *  マップタッチによるプレイヤーの移動中かどうかを
+ *  指定されたスイッチに格納します。
+ *  製作者 トリアコンタン
+ *
+ *  パラメータ
+ *  　結果が格納されるスイッチの番号
+ *
+ *  使用例
+ *  マップタッチ移動中判定 1
+ *  Get_Map_Touch_Moving \V[1]
+ * ===========================================================================
+ * マップタッチ移動(English:Map_Touch_Move)
+ *  マップをタッチしたのと同じ要領で指定位置にプレイヤーを移動します。
+ *  障害物やキー入力により移動は中断されます。
+ *  製作者 トリアコンタン
+ *
+ *  パラメータ
+ *  　移動先X座標
+ *  　移動先Y座標
+ *
+ *  使用例
+ *  マップタッチ移動 17 13
+ *  Map_Touch_Move \V[1] \V[2]
+ * ===========================================================================
+ * ピクチャの移動(English:Move_Picture)
+ *  イベントコマンド「ピクチャの移動」と同じ動作をします。
+ *  それぞれのパラメータを制御文字で変数指定できるのが特徴で減算合成も可能です。
+ *  製作者 トリアコンタン
+ *
+ *  パラメータ
+ *  　ピクチャ番号（0-100）
+ *  　原点（左上 or 中央）
+ *  　移動先X座標
+ *  　移動先Y座標
+ *  　X方向拡大率（マイナス値で画像反転）
+ *  　Y方向拡大率（マイナス値で画像反転）
+ *  　不透明度（0-255）
+ *  　合成方法（通常 or 加算 or 減算）
+ *  　移動フレーム数
+ *  　移動完了までウェイト（指定する場合「ウェイトあり」）
+ *
+ *  使用例
+ *  ピクチャの移動 1 左上 300 200 200 200 128 減算 240 ウェイトあり
+ *  Move_Picture \V[1] 中央 \V[2] \V[3] \V[4] \V[5] \V[6] 減算 \V[7]
  * ===========================================================================
  */
 
@@ -259,10 +334,10 @@
                 return $gameVariables.value(parseInt(wstringToString(arguments[1]), 10));
             }.bind(this));
             text = text.replace(/\x1bN\[([０-９\d]+)\]/gi, function() {
-                return actorName(parseInt(wstringToString(arguments[1]), 10));
+                return getActorName(parseInt(wstringToString(arguments[1]), 10));
             }.bind(this));
             text = text.replace(/\x1bP\[([０-９\d]+)\]/gi, function() {
-                return partyMemberName(parseInt(wstringToString(arguments[1]), 10));
+                return getPartyMemberName(parseInt(wstringToString(arguments[1]), 10));
             }.bind(this));
             text = text.replace(/\x1bG/gi, TextManager.currencyUnit);
             text = text.replace(/\x1bIn\[([０-９\d]+)\]/gi, function() {
@@ -279,12 +354,12 @@
         return text;
     };
 
-    var actorName = function(n) {
+    var getActorName = function(n) {
         var actor = n >= 1 ? $gameActors.actor(n) : null;
         return actor ? actor.name() : '';
     };
 
-    var partyMemberName = function(n) {
+    var getPartyMemberName = function(n) {
         var actor = n >= 1 ? $gameParty.members()[n - 1] : null;
         return actor ? actor.name() : '';
     };
@@ -400,13 +475,14 @@
 
             'バイブレーション' : function() {
                 if(typeof navigator !== 'undefined' && navigator.vibrate) {
-                    var time = Math.floor(args[0] * 60 / 1000);
-                    navigator.vibrate(time);
-                    if (args[1] === 'ウェイトあり') this.wait(time);
+                    var frame = parseInt(args[0], 10);
+                    navigator.vibrate(Math.floor(frame * 1000 / 60));
+                    var wait = (args[1] || '').toUpperCase();
+                    if (wait === 'ウェイトあり' || wait === 'WAIT') this.wait(frame);
                 }
             },
             'Vibration' : function() {
-                commandMap['バイブレーション']();
+                commandMap['バイブレーション'].call(this);
             },
 
             '指定位置の通行判定取得' : function() {
@@ -420,7 +496,7 @@
                 $gameVariables.setValue(args[0], value);
             },
             'Get_Location_Pass' : function() {
-                commandMap['指定位置の通行判定取得']();
+                commandMap['指定位置の通行判定取得'].call(this);
             },
 
             'スイッチの初期化' : function() {
@@ -436,7 +512,7 @@
                 });
             },
             'Init_Switches' : function() {
-                commandMap['スイッチの初期化']();
+                commandMap['スイッチの初期化'].call(this);
             },
 
             '変数の初期化' : function() {
@@ -452,14 +528,14 @@
                 });
             },
             'Init_Variables' : function() {
-                commandMap['変数の初期化']();
+                commandMap['変数の初期化'].call(this);
             },
 
             'セルフスイッチの初期化' : function() {
                 $gameSelfSwitches.clear();
             },
             'Init_Self_Switch' : function() {
-                commandMap['セルフスイッチの初期化']();
+                commandMap['セルフスイッチの初期化'].call(this);
             },
 
             'セルフスイッチの遠隔操作' : function() {
@@ -470,7 +546,7 @@
                 $gameSelfSwitches.setValue([mapId, eventId, type], value === 'ON');
             },
             'Remote_Control_Self_Switch' : function() {
-                commandMap['セルフスイッチの遠隔操作']();
+                commandMap['セルフスイッチの遠隔操作'].call(this);
             },
 
             'ピクチャの読み込み' : function() {
@@ -485,25 +561,29 @@
                 ImageManager.loadAnimation(args[0], hue);
             },
             'Load_Animation' : function() {
-                commandMap['戦闘アニメの読み込み']();
+                commandMap['戦闘アニメの読み込み'].call(this);
             },
 
             'シャットダウン' : function() {
-                if (Utils.isNwjs()) require('nw.gui').Window.get().close();
+                SceneManager.terminate();
             },
             'Shutdown' : function() {
-                commandMap['シャットダウン']();
+                commandMap['シャットダウン'].call(this);
             },
 
             'ウェブサイト起動' : function() {
                 if (Utils.isNwjs()) {
                     var newWindow = require('nw.gui').Window.open(args[0]);
-                    newWindow.moveTo(0, 0);
-                    newWindow.resizeTo(Graphics.width, Graphics.height);
+                    var x = parseInt(args[1], 10) || 0;
+                    var y = parseInt(args[2], 10) || 0;
+                    var width = parseInt(args[3], 10) || Graphics.width;
+                    var height = parseInt(args[4], 10) || Graphics.height;
+                    newWindow.moveTo(x, y);
+                    newWindow.resizeTo(width, height);
                 }
             },
             'Startup_Website' : function() {
-                commandMap['ウェブサイト起動']();
+                commandMap['ウェブサイト起動'].call(this);
             },
             
             '変数の操作' : function() {
@@ -546,7 +626,81 @@
             },
             'ConVar' : function() {
                 commandMap['変数の操作']();
-            }, 
+            },
+
+            'タッチ座標の取得' : function() {
+                var x, y;
+                if (TouchInput.isPressed()) {
+                    if (args[2] === 'マップ座標' || args[2] === 'Map') {
+                        x = $gameMap.canvasToMapX(TouchInput.x);
+                        y = $gameMap.canvasToMapY(TouchInput.y);
+                    } else {
+                        x = TouchInput.x;
+                        y = TouchInput.y;
+                    }
+                } else {
+                    x = -1;
+                    y = -1;
+                }
+                $gameVariables.setValue(parseInt(args[0], 10), x);
+                $gameVariables.setValue(parseInt(args[1], 10), y);
+            },
+            'Get_Touch_Info' : function() {
+                commandMap['タッチ座標の取得'].call(this);
+            },
+
+            'マップタッチ禁止の変更' : function() {
+                $gameSystem._mapTouchDisable = (args[0] === '禁止' || args[0] === 'Disable');
+            },
+            'Change_Map_Touch' : function() {
+                commandMap['マップタッチ禁止の変更'].call(this);
+            },
+
+            'マップタッチ移動中判定' : function() {
+                $gameSwitches.setValue(parseInt(args[0], 10), $gameTemp.isDestinationValid());
+            },
+            'Get_Map_Touch_Moving' : function() {
+                commandMap['マップタッチ移動中判定'].call(this);
+            },
+
+            'マップタッチ移動' : function() {
+                $gameTemp.setDestination(parseInt(args[0], 10), parseInt(args[1], 10));
+            },
+            'Map_Touch_Move' : function() {
+                commandMap['マップタッチ移動'].call(this);
+            },
+
+            'ピクチャの移動' : function() {
+                var pictureId = parseInt(args[0], 10);
+                var origin = args[1] === '左上' || args[1] === 'Upper_Left' ? 0 : 1;
+                var x = parseInt(args[2], 10);
+                var y = parseInt(args[3], 10);
+                var scaleX = parseInt(args[4], 10);
+                var scaleY = parseInt(args[5], 10);
+                var opacity = parseInt(args[6], 10);
+                var blendMode;
+                switch ((args[7] || '').toUpperCase()) {
+                    case '加算':
+                    case 'ADDITIVE':
+                        blendMode = 1;
+                        break;
+                    case '減算':
+                    case 'SUBTRACTIVE':
+                        blendMode = 2;
+                        break;
+                    default :
+                        blendMode = 0;
+                        break;
+                }
+                var duration = parseInt(args[8], 10);
+                $gameScreen.movePicture(pictureId, origin, x, y, scaleX, scaleY, opacity, blendMode, duration);
+                var wait = (args[9] || '').toUpperCase();
+                if (wait === 'ウェイトあり' || wait === 'WAIT') this.wait(duration);
+            },
+
+            'Move_Picture' : function() {
+                commandMap['ピクチャの移動'].call(this);
+            },
         };
 
         // コマンドチェック
@@ -556,7 +710,7 @@
 
         // コマンドの実行
         try {
-            commandMap[command]();
+            commandMap[command].call(this);
         } catch (e) {
             if ($gameTemp.isPlaytest() && Utils.isNwjs()) {
                 var window = require('nw.gui').Window.get();
@@ -594,4 +748,14 @@
         })();
     }
 
+    var _Game_System_initialize = Game_System.prototype.initialize;
+    Game_System.prototype.initialize = function() {
+        _Game_System_initialize.call(this);
+        this._mapTouchDisable = false;
+    };
+
+    var _Scene_Map_isMapTouchOk = Scene_Map.prototype.isMapTouchOk;
+    Scene_Map.prototype.isMapTouchOk = function() {
+        return (!$gameSystem._mapTouchDisable || $gameTemp.isDestinationValid()) && _Scene_Map_isMapTouchOk.call(this);
+    };
 })();
