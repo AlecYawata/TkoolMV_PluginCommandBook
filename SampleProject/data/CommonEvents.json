@@ -1,0 +1,7 @@
+[
+null,
+{"id":1,"list":[{"code":356,"indent":0,"parameters":["呼び出し元スキル取得 3"]},{"code":101,"indent":0,"parameters":["Auther",0,0,2]},{"code":401,"indent":0,"parameters":["アレク"]},{"code":401,"indent":0,"parameters":["「とうとう・・・"]},{"code":401,"indent":0,"parameters":["　『\\Sn[\\V[3]]』を"]},{"code":401,"indent":0,"parameters":["　使ってしまったんだね」"]},{"code":0,"indent":0,"parameters":[]}],"name":"スキルを使った","switchId":1,"trigger":0},
+{"id":2,"list":[{"code":356,"indent":0,"parameters":["呼び出し元アイテム取得 4"]},{"code":101,"indent":0,"parameters":["Auther",0,0,2]},{"code":401,"indent":0,"parameters":["アレク"]},{"code":401,"indent":0,"parameters":["「君はあの伝説のアイテムである"]},{"code":401,"indent":0,"parameters":["　『\\In[\\V[4]]』を"]},{"code":401,"indent":0,"parameters":["　使ったのだ！！」"]},{"code":0,"indent":0,"parameters":[]}],"name":"アイテムを使った","switchId":1,"trigger":0},
+{"id":3,"list":[{"code":0,"indent":0,"parameters":[]}],"name":"","switchId":1,"trigger":0},
+{"id":4,"list":[{"code":0,"indent":0,"parameters":[]}],"name":"","switchId":1,"trigger":0}
+]
