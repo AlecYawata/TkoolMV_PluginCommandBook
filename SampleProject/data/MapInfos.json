@@ -1,4 +1,5 @@
 [
 null,
-{"id":1,"expanded":false,"name":"サンプルマップ","order":1,"parentId":0,"scrollX":489,"scrollY":414}
+{"id":1,"expanded":true,"name":"サンプルマップ","order":1,"parentId":0,"scrollX":722.6666666666666,"scrollY":409.77777777777777},
+{"id":2,"expanded":false,"name":"プラグインコマンド集（トリアコンタン）テスト用マップ","order":2,"parentId":1,"scrollX":715.5555555555555,"scrollY":409.77777777777777}
 ]
