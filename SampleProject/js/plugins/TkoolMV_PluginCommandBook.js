@@ -374,356 +374,354 @@
             return;
         }
 
+        // コマンドの実行
+        this.executePluginCommand(command, args);
+    };
 
-        // 引数パラメータの制御文字での変換
-        for (var i=0; i<args.length; i++) {
-            args[i] = unescape(args[i]);
+    Game_Interpreter.prototype.executePluginCommand = function(command, args) {
+        var methodName = 'pluginCommandBook_' + command;
+        if (typeof this[methodName] === 'function') {
+            // 引数パラメータの制御文字での変換
+            for (var i=0; i<args.length; i++) {
+                args[i] = unescape(args[i]);
+            }
+            try {
+                this[methodName](args);
+            } catch (e) {
+                if ($gameTemp.isPlaytest() && Utils.isNwjs()) {
+                    var window = require('nw.gui').Window.get();
+                    var devTool = window.showDevTools();
+                    devTool.moveTo(0, 0);
+                    devTool.resizeTo(Graphics.width, Graphics.height);
+                    window.focus();
+                }
+                console.log('プラグインコマンドの実行中にエラーが発生しました。');
+                console.log('- コマンド名 　: ' + command);
+                console.log('- コマンド引数 : ' + args);
+                console.log('- エラー原因   : ' + e.toString());
+            }
         }
+    };
 
-        var commandMap = {
+    /**
+     * 名前の変更
+     *  主人公の名前を変更する
+     *  製作者 Alec
+     *
+     *  使用例
+     *  名前の変更 1 ライアン　　（アクター0001の名前をライアンに変更
+     *  名前の変更 2 \V[1]　　　（アクター0002の名前を変数0001の内容に変更
+     */
+    Game_Interpreter.prototype.pluginCommandBook_名前の変更 = function(args) {
+        var actorId = args[0]; // アクターID
+        var name = args[1]; // 名前
+        $gameActors.actor(actorId).setName(name);
+    };
 
-            /**
-             * 名前の変更
-             *  主人公の名前を変更する
-             *  製作者 Alec
-             *
-             *  使用例
-             *  名前の変更 1 ライアン　　（アクター0001の名前をライアンに変更
-             *  名前の変更 2 \V[1]　　　（アクター0002の名前を変数0001の内容に変更
-             */
-            '名前の変更' : function() {
-                var actorId = args[0]; // アクターID
-                var name = args[1]; // 名前
-                $gameActors.actor(actorId).setName(name);
-            },
+    /**
+     * 呼び出し元アイテム取得
+     *  コモンイベントを呼び出したアイテムのIDを変数に入れる
+     *  製作者 Alec
+     *
+     *  使用例
+     *  呼び出し元アイテム取得 1　　（変数0001にコモンイベントを呼び出したアイテムIDを入れる
+     */
+    Game_Interpreter.prototype.pluginCommandBook_呼び出し元アイテム取得 = function(args) {
+        var varId = parseInt(args[0]); // 変数ID
 
-            /**
-             * 呼び出し元アイテム取得
-             *  コモンイベントを呼び出したアイテムのIDを変数に入れる
-             *  製作者 Alec
-             *
-             *  使用例
-             *  呼び出し元アイテム取得 1　　（変数0001にコモンイベントを呼び出したアイテムIDを入れる
-             */
-            '呼び出し元アイテム取得' : function() {
-                var varId = parseInt(args[0]); // 変数ID
-
-                // アイテムを使ってなかったら
-                if (!$gameParty.lastItem()) {
-                    return;
-                }
-                $gameVariables.setValue(varId, $gameParty.lastItem().id);
-            },
-
-            /**
-             * 呼び出し元スキル取得
-             *  コモンイベントを呼び出したスキルのIDを変数に入れる
-             *  製作者 Alec
-             *
-             *  使用例
-             *  呼び出し元スキル取得 1　　（変数0001にコモンイベントを呼び出したスキルIDを入れる
-             */
-            '呼び出し元スキル取得' : function() {
-                if (eval(String(parameters['呼び出し元スキルの記録を使わない']||'false'))) {
-                    window.alert("「呼び出し元スキル取得」を使うにはプラグインマネージャーから「TkoolMV_PluginCommandBook.js」の「呼び出し元スキルの記録を使わない」を「はい」してください");
-                    return;
-                }
-                var varId = parseInt(args[0]); // 変数ID
-                var skillId = 0;
-                if ($gameParty.inBattle()) {
-                    skillId = BattleManager._subject.lastBattleSkill().id;
-                } else {
-                    skillId = $gameParty.menuActor().lastMenuSkill().id;
-                }
-                $gameVariables.setValue(varId, skillId);
-            },
-
-            /**
-             * レベルの変更
-             *  アクターのレベルを変更します。増減ではなく変更後のレベルを指定できます。
-             *  製作者 Alec
-             *
-             *  パラメータ
-             *  　アクターのID（もし0なら全員）
-             *    変更後のレベル
-             *    レベルアップをメッセージで表示するかどうか（表示・非表示）
-             *
-             *  使用例
-             *  レベルの変更 1 50 表示　　（アクター0001のレベルを50に変更
-             *  レベルの変更 0 10 非表示　（仲間全員のレベルを10に変更、レベルアップは表示しない
-             */
-            'レベルの変更' : function() {
-                var actorId = parseInt(args[0], 10);
-                var level = parseInt(args[1], 10) || 1;
-                var show = {"表示":true,"非表示":false,"はい":true,"いいえ":false}[args[2]||'表示'];
-                show = show === null ? false : show;
-                console.log(show);
-                if (actorId == 0) {
-                    $gameParty.members().forEach(function(actor){
-                        var exp = actor.expForLevel(level);
-                        actor.changeExp(exp, show);
-                    });
-                } else {
-                    var actor = $gameActors.actor(actorId);
-                    if (!actor) {
-                        return;
-                    }
-                    var exp = actor.expForLevel(level);
-                    actor.changeExp(exp, show);
-                }
-            },
-
-            'バイブレーション' : function() {
-                if(typeof navigator !== 'undefined' && navigator.vibrate) {
-                    var frame = parseInt(args[0], 10);
-                    navigator.vibrate(Math.floor(frame * 1000 / 60));
-                    var wait = (args[1] || '').toUpperCase();
-                    if (wait === 'ウェイトあり' || wait === 'WAIT') this.wait(frame);
-                }
-            },
-            'Vibration' : function() {
-                commandMap['バイブレーション'].call(this);
-            },
-
-            '指定位置の通行判定取得' : function() {
-                var x = parseInt(args[1], 10);
-                var y = parseInt(args[2], 10);
-                var value = 0;
-                value += $gamePlayer.isMapPassable(x, y, 8) ? 1000 : 0;
-                value += $gamePlayer.isMapPassable(x, y, 6) ? 100  : 0;
-                value += $gamePlayer.isMapPassable(x, y, 2) ? 10   : 0;
-                value += $gamePlayer.isMapPassable(x, y, 4) ? 1    : 0;
-                $gameVariables.setValue(args[0], value);
-            },
-            'Get_Location_Pass' : function() {
-                commandMap['指定位置の通行判定取得'].call(this);
-            },
-
-            'スイッチの初期化' : function() {
-                var exceptionValues = [];
-                args.forEach(function(arg) {
-                    arg = parseInt(arg, 10);
-                    exceptionValues[arg] = $gameSwitches.value(arg);
-                });
-                $gameSwitches.clear();
-                args.forEach(function(arg) {
-                    arg = parseInt(arg, 10);
-                    $gameSwitches.setValue(arg, exceptionValues[arg]);
-                });
-            },
-            'Init_Switches' : function() {
-                commandMap['スイッチの初期化'].call(this);
-            },
-
-            '変数の初期化' : function() {
-                var exceptionValues = [];
-                args.forEach(function(arg) {
-                    arg = parseInt(arg, 10);
-                    exceptionValues[arg] = $gameVariables.value(arg);
-                });
-                $gameVariables.clear();
-                args.forEach(function(arg) {
-                    arg = parseInt(arg, 10);
-                    $gameVariables.setValue(arg, exceptionValues[arg]);
-                });
-            },
-            'Init_Variables' : function() {
-                commandMap['変数の初期化'].call(this);
-            },
-
-            'セルフスイッチの初期化' : function() {
-                $gameSelfSwitches.clear();
-            },
-            'Init_Self_Switch' : function() {
-                commandMap['セルフスイッチの初期化'].call(this);
-            },
-
-            'セルフスイッチの遠隔操作' : function() {
-                var mapId   = Math.max(parseInt(args[0], 10), 1);
-                var eventId = Math.max(parseInt(args[1], 10), 1);
-                var type  = args[2].toUpperCase();
-                var value = args[3].toUpperCase();
-                $gameSelfSwitches.setValue([mapId, eventId, type], value === 'ON');
-            },
-            'Remote_Control_Self_Switch' : function() {
-                commandMap['セルフスイッチの遠隔操作'].call(this);
-            },
-
-            'ピクチャの読み込み' : function() {
-                ImageManager.loadPicture(args[0], 0);
-            },
-            'Load_Picture' : function() {
-                commandMap['ピクチャの読み込み']();
-            },
-
-            '戦闘アニメの読み込み' : function() {
-                var hue = parseInt(args[1], 10).clamp(0, 360);
-                ImageManager.loadAnimation(args[0], hue);
-            },
-            'Load_Animation' : function() {
-                commandMap['戦闘アニメの読み込み'].call(this);
-            },
-
-            'シャットダウン' : function() {
-                SceneManager.terminate();
-            },
-            'Shutdown' : function() {
-                commandMap['シャットダウン'].call(this);
-            },
-
-            'ウェブサイト起動' : function() {
-                if (Utils.isNwjs()) {
-                    var newWindow = require('nw.gui').Window.open(args[0]);
-                    var x = parseInt(args[1], 10) || 0;
-                    var y = parseInt(args[2], 10) || 0;
-                    var width = parseInt(args[3], 10) || Graphics.width;
-                    var height = parseInt(args[4], 10) || Graphics.height;
-                    newWindow.moveTo(x, y);
-                    newWindow.resizeTo(width, height);
-                }
-            },
-            'Startup_Website' : function() {
-                commandMap['ウェブサイト起動'].call(this);
-            },
-            
-            '変数の操作' : function() {
-                args[0]=args[0].replace('#' ,'');
-                var VarId1   = parseInt(args[0],10);
-                var Var1 = args[2];
-                var Var2 = $gameVariables.value(VarId1);
-                if (!isFinite(VarId1)) return;
-                args[1]=args[1].replace('set','=');
-                args[1]=args[1].replace('add','+=');
-                args[1]=args[1].replace('sub','-=');
-                args[1]=args[1].replace('mult','*=');
-                args[1]=args[1].replace('div','/=');
-                args[1]=args[1].replace('mod','%=');   
-                if (args[1]=='=') {
-                    $gameVariables.setValue(VarId1,Var1);
-                }
-                if (!isFinite(Var1)) return;
-                if (!isFinite(Var2)) return;
-                Var1 = parseInt(Var1,10);
-                Var2 = parseInt(Var2,10);
-                if (args[1]=='+=') {
-                   $gameVariables.setValue(VarId1,Var2+Var1);
-                }
-                if (args[1]=='-=') {
-                   $gameVariables.setValue(VarId1,Var2-Var1);
-                }
-                if (args[1]=='*=') {
-                   $gameVariables.setValue(VarId1,Var2*Var1);
-                }
-                if (args[1]=='/=') {
-                   $gameVariables.setValue(VarId1,(Var2-(Var2%Var1))/Var1);
-                }
-                if (args[1]=='%=') {
-                   $gameVariables.setValue(VarId1,Var2%Var1);
-                }
-            },
-            'ControlVariable' : function() {
-                commandMap['変数の操作']();
-            },
-            'ConVar' : function() {
-                commandMap['変数の操作']();
-            },
-
-            'タッチ座標の取得' : function() {
-                var x, y;
-                if (TouchInput.isPressed()) {
-                    if (args[2] === 'マップ座標' || args[2] === 'Map') {
-                        x = $gameMap.canvasToMapX(TouchInput.x);
-                        y = $gameMap.canvasToMapY(TouchInput.y);
-                    } else {
-                        x = TouchInput.x;
-                        y = TouchInput.y;
-                    }
-                } else {
-                    x = -1;
-                    y = -1;
-                }
-                $gameVariables.setValue(parseInt(args[0], 10), x);
-                $gameVariables.setValue(parseInt(args[1], 10), y);
-            },
-            'Get_Touch_Info' : function() {
-                commandMap['タッチ座標の取得'].call(this);
-            },
-
-            'マップタッチ禁止の変更' : function() {
-                $gameSystem._mapTouchDisable = (args[0] === '禁止' || args[0] === 'Disable');
-            },
-            'Change_Map_Touch' : function() {
-                commandMap['マップタッチ禁止の変更'].call(this);
-            },
-
-            'マップタッチ移動中判定' : function() {
-                $gameSwitches.setValue(parseInt(args[0], 10), $gameTemp.isDestinationValid());
-            },
-            'Get_Map_Touch_Moving' : function() {
-                commandMap['マップタッチ移動中判定'].call(this);
-            },
-
-            'マップタッチ移動' : function() {
-                $gameTemp.setDestination(parseInt(args[0], 10), parseInt(args[1], 10));
-            },
-            'Map_Touch_Move' : function() {
-                commandMap['マップタッチ移動'].call(this);
-            },
-
-            'ピクチャの移動' : function() {
-                var pictureId = parseInt(args[0], 10);
-                var origin = args[1] === '左上' || args[1] === 'Upper_Left' ? 0 : 1;
-                var x = parseInt(args[2], 10);
-                var y = parseInt(args[3], 10);
-                var scaleX = parseInt(args[4], 10);
-                var scaleY = parseInt(args[5], 10);
-                var opacity = parseInt(args[6], 10);
-                var blendMode;
-                switch ((args[7] || '').toUpperCase()) {
-                    case '加算':
-                    case 'ADDITIVE':
-                        blendMode = 1;
-                        break;
-                    case '減算':
-                    case 'SUBTRACTIVE':
-                        blendMode = 2;
-                        break;
-                    default :
-                        blendMode = 0;
-                        break;
-                }
-                var duration = parseInt(args[8], 10);
-                $gameScreen.movePicture(pictureId, origin, x, y, scaleX, scaleY, opacity, blendMode, duration);
-                var wait = (args[9] || '').toUpperCase();
-                if (wait === 'ウェイトあり' || wait === 'WAIT') this.wait(duration);
-            },
-
-            'Move_Picture' : function() {
-                commandMap['ピクチャの移動'].call(this);
-            },
-        };
-
-        // コマンドチェック
-        if (!(command in commandMap)) {
+        // アイテムを使ってなかったら
+        if (!$gameParty.lastItem()) {
             return;
         }
+        $gameVariables.setValue(varId, $gameParty.lastItem().id);
+    };
 
-        // コマンドの実行
-        try {
-            commandMap[command].call(this);
-        } catch (e) {
-            if ($gameTemp.isPlaytest() && Utils.isNwjs()) {
-                var window = require('nw.gui').Window.get();
-                var devTool = window.showDevTools();
-                devTool.moveTo(0, 0);
-                devTool.resizeTo(Graphics.width, Graphics.height);
-                window.focus();
-            }
-            console.log('プラグインコマンドの実行中にエラーが発生しました。');
-            console.log('- コマンド名 　: ' + command);
-            console.log('- コマンド引数 : ' + args);
-            console.log('- エラー原因   : ' + e.toString());
+    /**
+     * 呼び出し元スキル取得
+     *  コモンイベントを呼び出したスキルのIDを変数に入れる
+     *  製作者 Alec
+     *
+     *  使用例
+     *  呼び出し元スキル取得 1　　（変数0001にコモンイベントを呼び出したスキルIDを入れる
+     */
+    Game_Interpreter.prototype.pluginCommandBook_呼び出し元スキル取得 = function(args) {
+        if (eval(String(parameters['呼び出し元スキルの記録を使わない']||'false'))) {
+            window.alert("「呼び出し元スキル取得」を使うにはプラグインマネージャーから「TkoolMV_PluginCommandBook.js」の「呼び出し元スキルの記録を使わない」を「はい」してください");
+            return;
         }
+        var varId = parseInt(args[0]); // 変数ID
+        var skillId = 0;
+        if ($gameParty.inBattle()) {
+            skillId = BattleManager._subject.lastBattleSkill().id;
+        } else {
+            skillId = $gameParty.menuActor().lastMenuSkill().id;
+        }
+        $gameVariables.setValue(varId, skillId);
+    };
+
+    /**
+     * レベルの変更
+     *  アクターのレベルを変更します。増減ではなく変更後のレベルを指定できます。
+     *  製作者 Alec
+     *
+     *  パラメータ
+     *  　アクターのID（もし0なら全員）
+     *    変更後のレベル
+     *    レベルアップをメッセージで表示するかどうか（表示・非表示）
+     *
+     *  使用例
+     *  レベルの変更 1 50 表示　　（アクター0001のレベルを50に変更
+     *  レベルの変更 0 10 非表示　（仲間全員のレベルを10に変更、レベルアップは表示しない
+     */
+    Game_Interpreter.prototype.pluginCommandBook_レベルの変更 = function(args) {
+        var actorId = parseInt(args[0], 10);
+        var level = parseInt(args[1], 10) || 1;
+        var show = {"表示":true,"非表示":false,"はい":true,"いいえ":false}[args[2]||'表示'];
+        show = show === null ? false : show;
+        console.log(show);
+        if (actorId == 0) {
+            $gameParty.members().forEach(function(actor){
+                var exp = actor.expForLevel(level);
+                actor.changeExp(exp, show);
+            });
+        } else {
+            var actor = $gameActors.actor(actorId);
+            if (!actor) {
+                return;
+            }
+            var exp = actor.expForLevel(level);
+            actor.changeExp(exp, show);
+        }
+    };
+
+    Game_Interpreter.prototype.pluginCommandBook_バイブレーション = function(args) {
+        if(Utils.isMobileDevice() && typeof navigator.vibrate === 'function') {
+            var frame = parseInt(args[0], 10);
+            navigator.vibrate(Math.floor(frame * 1000 / 60));
+            var wait = (args[1] || '').toUpperCase();
+            if (wait === 'ウェイトあり' || wait === 'WAIT') this.wait(frame);
+        }
+    };
+    Game_Interpreter.prototype.pluginCommandBook_Vibration = function(args) {
+        this.pluginCommandBook_バイブレーション(args);
+    };
+
+    Game_Interpreter.prototype.pluginCommandBook_指定位置の通行判定取得 = function(args) {
+        var x = parseInt(args[1], 10);
+        var y = parseInt(args[2], 10);
+        var value = 0;
+        value += $gamePlayer.isMapPassable(x, y, 8) ? 1000 : 0;
+        value += $gamePlayer.isMapPassable(x, y, 6) ? 100  : 0;
+        value += $gamePlayer.isMapPassable(x, y, 2) ? 10   : 0;
+        value += $gamePlayer.isMapPassable(x, y, 4) ? 1    : 0;
+        $gameVariables.setValue(args[0], value);
+    };
+    Game_Interpreter.prototype.pluginCommandBook_Get_Location_Pass = function(args) {
+        this.pluginCommandBook_指定位置の通行判定取得(args);
+    };
+
+    Game_Interpreter.prototype.pluginCommandBook_スイッチの初期化 = function(args) {
+        var exceptionValues = [];
+        args.forEach(function(arg) {
+            arg = parseInt(arg, 10);
+            exceptionValues[arg] = $gameSwitches.value(arg);
+        });
+        $gameSwitches.clear();
+        args.forEach(function(arg) {
+            arg = parseInt(arg, 10);
+            $gameSwitches.setValue(arg, exceptionValues[arg]);
+        });
+    };
+    Game_Interpreter.prototype.pluginCommandBook_Init_Switches = function(args) {
+        this.pluginCommandBook_pluginCommandBook_スイッチの初期化(args);
+    };
+
+    Game_Interpreter.prototype.pluginCommandBook_変数の初期化 = function(args) {
+        var exceptionValues = [];
+        args.forEach(function(arg) {
+            arg = parseInt(arg, 10);
+            exceptionValues[arg] = $gameVariables.value(arg);
+        });
+        $gameVariables.clear();
+        args.forEach(function(arg) {
+            arg = parseInt(arg, 10);
+            $gameVariables.setValue(arg, exceptionValues[arg]);
+        });
+    };
+    Game_Interpreter.prototype.pluginCommandBook_Init_Variables = function(args) {
+        this.pluginCommandBook_pluginCommandBook_変数の初期化(args);
+    };
+
+    Game_Interpreter.prototype.pluginCommandBook_セルフスイッチの初期化 = function(args) {
+        $gameSelfSwitches.clear();
+    };
+    Game_Interpreter.prototype.pluginCommandBook_Init_Self_Switch = function(args) {
+        this.pluginCommandBook_pluginCommandBook_セルフスイッチの初期化(args);
+    };
+
+    Game_Interpreter.prototype.pluginCommandBook_セルフスイッチの遠隔操作 = function(args) {
+        var mapId   = Math.max(parseInt(args[0], 10), 1);
+        var eventId = Math.max(parseInt(args[1], 10), 1);
+        var type  = args[2].toUpperCase();
+        var value = args[3].toUpperCase();
+        $gameSelfSwitches.setValue([mapId, eventId, type], value === 'ON');
+    };
+    Game_Interpreter.prototype.pluginCommandBook_Remote_Control_Self_Switch = function(args) {
+        this.pluginCommandBook_セルフスイッチの遠隔操作(args);
+    };
+
+    Game_Interpreter.prototype.pluginCommandBook_ピクチャの読み込み = function(args) {
+        ImageManager.loadPicture(args[0], 0);
+    };
+    Game_Interpreter.prototype.pluginCommandBook_Load_Picture = function(args) {
+        this.pluginCommandBook_ピクチャの読み込み();
+    };
+
+    Game_Interpreter.prototype.pluginCommandBook_戦闘アニメの読み込み = function(args) {
+        var hue = parseInt(args[1], 10).clamp(0, 360);
+        ImageManager.loadAnimation(args[0], hue);
+    };
+    Game_Interpreter.prototype.pluginCommandBook_Load_Animation = function(args) {
+        this.pluginCommandBook_戦闘アニメの読み込み(args);
+    };
+
+    Game_Interpreter.prototype.pluginCommandBook_シャットダウン = function(args) {
+        SceneManager.terminate();
+    };
+    Game_Interpreter.prototype.pluginCommandBook_Shutdown = function(args) {
+        this.pluginCommandBook_シャットダウン(args);
+    };
+
+    Game_Interpreter.prototype.pluginCommandBook_ウェブサイト起動 = function(args) {
+        if (Utils.isNwjs()) {
+            var newWindow = require('nw.gui').Window.open(args[0]);
+            var x = parseInt(args[1], 10) || 0;
+            var y = parseInt(args[2], 10) || 0;
+            var width = parseInt(args[3], 10) || Graphics.width;
+            var height = parseInt(args[4], 10) || Graphics.height;
+            newWindow.moveTo(x, y);
+            newWindow.resizeTo(width, height);
+        }
+    };
+    Game_Interpreter.prototype.pluginCommandBook_Startup_Website = function(args) {
+        this.pluginCommandBook_ウェブサイト起動(args);
+    };
+
+    Game_Interpreter.prototype.pluginCommandBook_変数の操作 = function(args) {
+        args[0]=args[0].replace('#' ,'');
+        var VarId1   = parseInt(args[0],10);
+        var Var1 = args[2];
+        var Var2 = $gameVariables.value(VarId1);
+        if (!isFinite(VarId1)) return;
+        args[1]=args[1].replace('set','=');
+        args[1]=args[1].replace('add','+=');
+        args[1]=args[1].replace('sub','-=');
+        args[1]=args[1].replace('mult','*=');
+        args[1]=args[1].replace('div','/=');
+        args[1]=args[1].replace('mod','%=');
+        if (args[1]=='=') {
+            $gameVariables.setValue(VarId1,Var1);
+        }
+        if (!isFinite(Var1)) return;
+        if (!isFinite(Var2)) return;
+        Var1 = parseInt(Var1,10);
+        Var2 = parseInt(Var2,10);
+        if (args[1]=='+=') {
+            $gameVariables.setValue(VarId1,Var2+Var1);
+        }
+        if (args[1]=='-=') {
+            $gameVariables.setValue(VarId1,Var2-Var1);
+        }
+        if (args[1]=='*=') {
+            $gameVariables.setValue(VarId1,Var2*Var1);
+        }
+        if (args[1]=='/=') {
+            $gameVariables.setValue(VarId1,(Var2-(Var2%Var1))/Var1);
+        }
+        if (args[1]=='%=') {
+            $gameVariables.setValue(VarId1,Var2%Var1);
+        }
+    };
+    Game_Interpreter.prototype.pluginCommandBook_ControlVariable = function(args) {
+        this.pluginCommandBook_変数の操作();
+    };
+    Game_Interpreter.prototype.pluginCommandBook_ConVar = function(args) {
+        this.pluginCommandBook_変数の操作();
+    };
+
+    Game_Interpreter.prototype.pluginCommandBook_タッチ座標の取得 = function(args) {
+        var x, y;
+        if (TouchInput.isPressed()) {
+            if (args[2] === 'マップ座標' || args[2] === 'Map') {
+                x = $gameMap.canvasToMapX(TouchInput.x);
+                y = $gameMap.canvasToMapY(TouchInput.y);
+            } else {
+                x = TouchInput.x;
+                y = TouchInput.y;
+            }
+        } else {
+            x = -1;
+            y = -1;
+        }
+        $gameVariables.setValue(parseInt(args[0], 10), x);
+        $gameVariables.setValue(parseInt(args[1], 10), y);
+    };
+    Game_Interpreter.prototype.pluginCommandBook_Get_Touch_Info = function(args) {
+        this.pluginCommandBook_タッチ座標の取得(args);
+    };
+
+    Game_Interpreter.prototype.pluginCommandBook_マップタッチ禁止の変更 = function(args) {
+        $gameSystem._mapTouchDisable = (args[0] === '禁止' || args[0] === 'Disable');
+    };
+    Game_Interpreter.prototype.pluginCommandBook_Change_Map_Touch = function(args) {
+        this.pluginCommandBook_マップタッチ禁止の変更(args);
+    };
+
+    Game_Interpreter.prototype.pluginCommandBook_マップタッチ移動中判定 = function(args) {
+        $gameSwitches.setValue(parseInt(args[0], 10), $gameTemp.isDestinationValid());
+    };
+    Game_Interpreter.prototype.pluginCommandBook_Get_Map_Touch_Moving = function(args) {
+        this.pluginCommandBook_マップタッチ移動中判定(args);
+    };
+
+    Game_Interpreter.prototype.pluginCommandBook_マップタッチ移動 = function(args) {
+        $gameTemp.setDestination(parseInt(args[0], 10), parseInt(args[1], 10));
+    };
+
+    Game_Interpreter.prototype.pluginCommandBook_Map_Touch_Move = function(args) {
+        this.pluginCommandBook_マップタッチ移動(args);
+    };
+
+    Game_Interpreter.prototype.pluginCommandBook_ピクチャの移動 = function(args) {
+        var pictureId = parseInt(args[0], 10);
+        var origin = args[1] === '左上' || args[1] === 'Upper_Left' ? 0 : 1;
+        var x = parseInt(args[2], 10);
+        var y = parseInt(args[3], 10);
+        var scaleX = parseInt(args[4], 10);
+        var scaleY = parseInt(args[5], 10);
+        var opacity = parseInt(args[6], 10);
+        var blendMode;
+        switch ((args[7] || '').toUpperCase()) {
+            case '加算':
+            case 'ADDITIVE':
+                blendMode = 1;
+                break;
+            case '減算':
+            case 'SUBTRACTIVE':
+                blendMode = 2;
+                break;
+            default :
+                blendMode = 0;
+                break;
+        }
+        var duration = parseInt(args[8], 10);
+        $gameScreen.movePicture(pictureId, origin, x, y, scaleX, scaleY, opacity, blendMode, duration);
+        var wait = (args[9] || '').toUpperCase();
+        if (wait === 'ウェイトあり' || wait === 'WAIT') this.wait(duration);
+    };
+
+    Game_Interpreter.prototype.pluginCommandBook_Move_Picture = function(args) {
+        this.pluginCommandBook_ピクチャの移動(args);
     };
 
     /*
