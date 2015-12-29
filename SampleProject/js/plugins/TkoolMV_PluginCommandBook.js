@@ -227,7 +227,7 @@
  *                        [代入：set  加算:add  減算：sub  乗算：mult  除算：div  剰余：mod]
  *  引数3：操作用の値
  *  引数4：値の型(省略可) [数字優先(省略値)：0  文字優先:1]
- * 
+ *
  * 使用例：
  *   変数の操作 #0001 += \V[2] //変数1に変数2の値を加算
  *   変数の操作 \V[2] = \V[3]  //変数2の値と同番号の変数に変数3の値を代入
@@ -244,8 +244,8 @@
  *  製作者 トリアコンタン
  *
  *  パラメータ
- *  　X座標が格納される変数の番号
- *  　Y座標が格納される変数の番号
+ *  　X座標が格納される変数の番号（1-5000）
+ *  　Y座標が格納される変数の番号（1-5000）
  *  　取得タイプ（画面座標 or マップ座標）※指定しない場合は画面座標
  *
  *  使用例
@@ -269,7 +269,7 @@
  *  製作者 トリアコンタン
  *
  *  パラメータ
- *  　結果が格納されるスイッチの番号
+ *  　結果が格納されるスイッチの番号（1-5000）
  *
  *  使用例
  *  マップタッチ移動中判定 1
@@ -294,7 +294,7 @@
  *  製作者 トリアコンタン
  *
  *  パラメータ
- *  　ピクチャ番号（0-100）
+ *  　ピクチャ番号（1-100）
  *  　原点（左上 or 中央）
  *  　移動先X座標
  *  　移動先Y座標
@@ -309,9 +309,120 @@
  *  ピクチャの移動 1 左上 300 200 200 200 128 減算 240 ウェイトあり
  *  Move_Picture \V[1] 中央 \V[2] \V[3] \V[4] \V[5] \V[6] 減算 \V[7]
  * ===========================================================================
+ * 数値入力範囲の設定(English:Set_Input_Num_Range)
+ *  イベントコマンド「数値入力の処理」で入力可能な値の最小値と最大値を設定します。
+ *  入力可能桁数と併せて考慮されます。
+ *  この設定は解除忘れ防止のため、数値入力の処理を終えた時点で初期化されます。
+ *
+ *  製作者 トリアコンタン
+ *
+ *  パラメータ
+ *  　入力可能最小値（0-99999999）
+ *  　入力可能最大値（0-99999999）
+ *
+ *  使用例
+ *  数値入力範囲の設定 0 500
+ *  Set_Input_Num_Range \V[1] \V[2]
+ * ===========================================================================
+ * 数値入力ウィンドウの設定(English:Set_Num_Input_Window)
+ *  イベントコマンド「数値入力の処理」で表示されるウィンドウの背景と位置を設定します。
+ *  製作者 トリアコンタン
+ *
+ *  パラメータ
+ *  　背景（ウィンドウ or 暗くする or 透明）
+ *  　位置（左 or 中 or 右）
+ *
+ *  使用例
+ *  数値入力ウィンドウの設定 ウィンドウ 左
+ *  Set_Num_Input_Window 暗くする 中
+ * ===========================================================================
+ * 数値入力有効桁の設定(English:Set_Num_Input_Valid_Digit)
+ *  イベントコマンド「数値入力の処理」で入力可能な有効桁を設定します。
+ *  有効桁より小さい桁は変更できなくなります。(1桁目を0で固定したい場合などに使用)
+ *  1を指定すると通常通り、全ての桁を入力できます。
+ *  この設定は解除忘れ防止のため、数値入力の処理を終えた時点で初期化されます。
+ *  製作者 トリアコンタン
+ *
+ *  パラメータ
+ *  　有効桁（1-8）
+ *
+ *  使用例
+ *  数値入力有効桁の設定 2
+ *  Set_Num_Input_Valid_Digit \v[1]
+ * ===========================================================================
+ * ピクチャの有効判定(English:Get_Picture_Valid)
+ *  指定された番号のピクチャが現在、使われているかを判定して結果をスイッチに格納します。
+ *  「ピクチャの表示」で使用状態になり、「ピクチャの消去」で非使用状態になります。
+ *  製作者 トリアコンタン
+ *
+ *  パラメータ
+ *  　結果が格納されるスイッチの番号（1-5000）
+ *  　ピクチャ番号（1-100）
+ *
+ *  使用例
+ *  ピクチャの有効判定 2 1
+ *  Get_Picture_Valid \v[1] \v[2]
+ * ===========================================================================
+ * ピクチャの表示優先度設定(English:Set_Picture_Priority)
+ *  指定した番号のピクチャの表示優先度を設定します。表示優先度の高いピクチャほど
+ *  画面の前面に表示されます。この設定はピクチャ番号よりも優先されます。
+ *  デフォルト値は100です。
+ *  製作者 トリアコンタン
+ *
+ *  パラメータ
+ *  　ピクチャ番号（1-100）
+ *  　表示優先度の値（デフォルト100）
+ *
+ *  使用例
+ *  ピクチャの表示優先度設定 1 101
+ *  Set_Picture_Priority \v[1] \v[2]
+ * ===========================================================================
+ * ピクチャの表示優先度設定(English:Set_Picture_Priority)
+ *  指定した番号のピクチャの表示優先度を設定します。表示優先度の高いピクチャほど
+ *  画面の前面に表示されます。この設定はピクチャ番号よりも優先されます。
+ *  デフォルト値は100です。
+ *  製作者 トリアコンタン
+ *
+ *  パラメータ
+ *  　ピクチャ番号（1-100）
+ *  　表示優先度の値（デフォルト100）
+ *
+ *  使用例
+ *  ピクチャの表示優先度設定 1 101
+ *  Set_Picture_Priority \v[1] \v[2]
+ * ===========================================================================
+ * ピクチャのトリミング(English:Trimming_Picture)
+ *  指定した矩形（X座標、Y座標、横幅、高さ）でピクチャを切り出します。
+ *  製作者 トリアコンタン
+ *
+ *  パラメータ
+ *  　ピクチャ番号（1-100）
+ *  　X座標
+ *  　Y座標
+ *  　横幅
+ *  　高さ
+ *
+ *  使用例
+ *  ピクチャのトリミング 1 0 0 320 240
+ *  Trimming_Picture \v[1] \v[2] \v[3] \v[4] \v[5]
+ * ===========================================================================
+ * ピクチャの回転角設定(English:Angle_Picture)
+ *  指定した角度で時計回りにピクチャを回転させます。
+ *  「ピクチャの回転」とは異なり回転させた状態のまま保たれます。
+ *  製作者 トリアコンタン
+ *
+ *  パラメータ
+ *  　ピクチャ番号（1-100）
+ *  　回転角（0-360）
+ *
+ *  使用例
+ *  ピクチャの回転角設定 1 90
+ *  Trimming_Picture \v[1] \v[2]
+ * ===========================================================================
  */
 
 (function(){
+    'use strict';
 
     /*
      * 全角数字を半角数字に変換する
@@ -366,6 +477,23 @@
         return actor ? actor.name() : '';
     };
 
+    /**
+     * 厳密な数値チェックを行います。引数が数値でなければ例外を発生されます。
+     * プラグインコマンド集では、例外が発生してもその場でゲームは中断されず
+     * 実行したコマンドのみが無効になり、さらにテストプレーなら自動でデベロッパツールが起動します。
+     *
+     * @method parseIntStrict
+     * @param {Number} value
+     * @param {String} errorMessage
+     * @type Number
+     * @return {Number} 数値に変換した結果
+     */
+    var parseIntStrict = function(value, errorMessage) {
+        var result = parseInt(value, 10);
+        if (isNaN(result)) throw Error('指定した値[' + value + ']が数値ではありません。' + errorMessage);
+        return result;
+    };
+
     var parameters = PluginManager.parameters('TkoolMV_PluginCommandBook');
 
     var _Game_Interpreter_pluginCommand      = Game_Interpreter.prototype.pluginCommand;
@@ -392,10 +520,12 @@
             } catch (e) {
                 if ($gameTemp.isPlaytest() && Utils.isNwjs()) {
                     var window = require('nw.gui').Window.get();
-                    var devTool = window.showDevTools();
-                    devTool.moveTo(0, 0);
-                    devTool.resizeTo(Graphics.width, Graphics.height);
-                    window.focus();
+                    if (!window.isDevToolsOpen()) {
+                        var devTool = window.showDevTools();
+                        devTool.moveTo(0, 0);
+                        devTool.resizeTo(Graphics.width, Graphics.height);
+                        window.focus();
+                    }
                 }
                 console.log('プラグインコマンドの実行中にエラーが発生しました。');
                 console.log('- コマンド名 　: ' + command);
@@ -498,7 +628,7 @@
 
     Game_Interpreter.prototype.pluginCommandBook_バイブレーション = function(args) {
         if(Utils.isMobileDevice() && typeof navigator.vibrate === 'function') {
-            var frame = parseInt(args[0], 10);
+            var frame = parseIntStrict(args[0]);
             navigator.vibrate(Math.floor(frame * 1000 / 60));
             var wait = (args[1] || '').toUpperCase();
             if (wait === 'ウェイトあり' || wait === 'WAIT') this.wait(frame);
@@ -509,8 +639,8 @@
     };
 
     Game_Interpreter.prototype.pluginCommandBook_指定位置の通行判定取得 = function(args) {
-        var x = parseInt(args[1], 10);
-        var y = parseInt(args[2], 10);
+        var x = parseIntStrict(args[1]);
+        var y = parseIntStrict(args[2]);
         var value = 0;
         value += $gamePlayer.isMapPassable(x, y, 8) ? 1000 : 0;
         value += $gamePlayer.isMapPassable(x, y, 6) ? 100  : 0;
@@ -525,12 +655,12 @@
     Game_Interpreter.prototype.pluginCommandBook_スイッチの初期化 = function(args) {
         var exceptionValues = [];
         args.forEach(function(arg) {
-            arg = parseInt(arg, 10);
+            arg = parseIntStrict(arg);
             exceptionValues[arg] = $gameSwitches.value(arg);
         });
         $gameSwitches.clear();
         args.forEach(function(arg) {
-            arg = parseInt(arg, 10);
+            arg = parseIntStrict(arg);
             $gameSwitches.setValue(arg, exceptionValues[arg]);
         });
     };
@@ -541,12 +671,12 @@
     Game_Interpreter.prototype.pluginCommandBook_変数の初期化 = function(args) {
         var exceptionValues = [];
         args.forEach(function(arg) {
-            arg = parseInt(arg, 10);
+            arg = parseIntStrict(arg);
             exceptionValues[arg] = $gameVariables.value(arg);
         });
         $gameVariables.clear();
         args.forEach(function(arg) {
-            arg = parseInt(arg, 10);
+            arg = parseIntStrict(arg);
             $gameVariables.setValue(arg, exceptionValues[arg]);
         });
     };
@@ -562,8 +692,8 @@
     };
 
     Game_Interpreter.prototype.pluginCommandBook_セルフスイッチの遠隔操作 = function(args) {
-        var mapId   = Math.max(parseInt(args[0], 10), 1);
-        var eventId = Math.max(parseInt(args[1], 10), 1);
+        var mapId   = Math.max(parseIntStrict(args[0]), 1);
+        var eventId = Math.max(parseIntStrict(args[1]), 1);
         var type  = args[2].toUpperCase();
         var value = args[3].toUpperCase();
         $gameSelfSwitches.setValue([mapId, eventId, type], value === 'ON');
@@ -670,8 +800,8 @@
             x = -1;
             y = -1;
         }
-        $gameVariables.setValue(parseInt(args[0], 10), x);
-        $gameVariables.setValue(parseInt(args[1], 10), y);
+        $gameVariables.setValue(parseIntStrict(args[0]), x);
+        $gameVariables.setValue(parseIntStrict(args[1]), y);
     };
     Game_Interpreter.prototype.pluginCommandBook_Get_Touch_Info = function(args) {
         this.pluginCommandBook_タッチ座標の取得(args);
@@ -685,7 +815,7 @@
     };
 
     Game_Interpreter.prototype.pluginCommandBook_マップタッチ移動中判定 = function(args) {
-        $gameSwitches.setValue(parseInt(args[0], 10), $gameTemp.isDestinationValid());
+        $gameSwitches.setValue(parseIntStrict(args[0]), $gameTemp.isDestinationValid());
     };
     Game_Interpreter.prototype.pluginCommandBook_Get_Map_Touch_Moving = function(args) {
         this.pluginCommandBook_マップタッチ移動中判定(args);
@@ -702,11 +832,11 @@
     Game_Interpreter.prototype.pluginCommandBook_ピクチャの移動 = function(args) {
         var pictureId = parseInt(args[0], 10);
         var origin = args[1] === '左上' || args[1] === 'Upper_Left' ? 0 : 1;
-        var x = parseInt(args[2], 10);
-        var y = parseInt(args[3], 10);
-        var scaleX = parseInt(args[4], 10);
-        var scaleY = parseInt(args[5], 10);
-        var opacity = parseInt(args[6], 10);
+        var x = parseIntStrict(args[2]);
+        var y = parseIntStrict(args[3]);
+        var scaleX = parseIntStrict(args[4]);
+        var scaleY = parseIntStrict(args[5]);
+        var opacity = parseIntStrict(args[6]);
         var blendMode;
         switch ((args[7] || '').toUpperCase()) {
             case '加算':
@@ -731,6 +861,108 @@
         this.pluginCommandBook_ピクチャの移動(args);
     };
 
+    Game_Interpreter.prototype.pluginCommandBook_数値入力範囲の設定 = function(args) {
+        $gameMessage.setNumInputRange(
+            parseIntStrict(args[0]).clamp(0, 99999999),
+            parseIntStrict(args[1]).clamp(0, 99999999));
+    };
+    Game_Interpreter.prototype.pluginCommandBook_Set_Input_Num_Range = function(args) {
+        this.pluginCommandBook_数値入力範囲の設定(args);
+    };
+    Game_Interpreter.prototype.pluginCommandBook_数値入力ウィンドウの設定 = function(args) {
+        var background;
+        switch (args[0].toUpperCase()) {
+            case 'ウィンドウ':
+            case 'WINDOW':
+                background = 0;
+                break;
+            case '暗くする':
+            case 'DIM':
+                background = 1;
+                break;
+            case '透明':
+            case 'TRANSPARENT':
+                background = 2;
+                break;
+            default:
+                throw new Error('背景に指定した値['+ args[0] +']が不正です。');
+        }
+        var position;
+        switch (args[1].toUpperCase()) {
+            case '左':
+            case 'LEFT':
+                position = 0;
+                break;
+            case '中':
+            case 'MIDDLE':
+                position = 1;
+                break;
+            case '右':
+            case 'RIGHT':
+                position = 2;
+                break;
+            default:
+                throw new Error('位置に指定した値['+ args[1] +']が不正です。');
+        }
+        $gameMessage.setNumInputBackground(background);
+        $gameMessage.setNumInputPositionType(position);
+    };
+    Game_Interpreter.prototype.pluginCommandBook_Set_Num_Input_Window = function(args) {
+        this.pluginCommandBook_数値入力ウィンドウの設定(args);
+    };
+
+    Game_Interpreter.prototype.pluginCommandBook_数値入力有効桁の設定 = function(args) {
+        $gameMessage._numInputValidDigit = parseIntStrict(args[0]).clamp(1, 8);
+    };
+    Game_Interpreter.prototype.pluginCommandBook_Set_Num_Input_Valid_Digit = function(args) {
+        this.pluginCommandBook_数値入力有効桁の設定(args);
+    };
+
+    Game_Interpreter.prototype.pluginCommandBook_ピクチャの有効判定 = function(args) {
+        var picture = $gameScreen.picture($gameScreen.realPictureId(parseIntStrict(args[1])));
+        $gameSwitches.setValue(parseIntStrict(args[0]), picture != null);
+    };
+    Game_Interpreter.prototype.pluginCommandBook_Get_Picture_Valid = function(args) {
+        this.pluginCommandBook_ピクチャの有効判定(args);
+    };
+
+    Game_Interpreter.prototype.pluginCommandBook_ピクチャの表示優先度設定 = function(args) {
+        var picture = $gameScreen.picture($gameScreen.realPictureId(parseIntStrict(args[0])));
+        if (picture) {
+            picture.setZ(parseIntStrict(args[1]));
+        } else {
+            throw new Error('指定された番号[' + args[0] + ']のピクチャは無効です。');
+        }
+    };
+    Game_Interpreter.prototype.pluginCommandBook_Set_Picture_Priority = function(args) {
+        this.pluginCommandBook_ピクチャの表示優先度設定(args);
+    };
+
+    Game_Interpreter.prototype.pluginCommandBook_ピクチャのトリミング = function(args) {
+        var picture = $gameScreen.picture($gameScreen.realPictureId(parseIntStrict(args[0])));
+        if (picture) {
+            picture.setFrameDirect(parseIntStrict(args[1]), parseIntStrict(args[2]),
+                parseIntStrict(args[3]), parseIntStrict(args[4]));
+        } else {
+            throw new Error('指定された番号[' + args[0] + ']のピクチャは無効です。');
+        }
+    };
+    Game_Interpreter.prototype.pluginCommandBook_Trimming_Picture = function(args) {
+        this.pluginCommandBook_ピクチャのトリミング(args);
+    };
+
+    Game_Interpreter.prototype.pluginCommandBook_ピクチャの回転角設定 = function(args) {
+        var picture = $gameScreen.picture($gameScreen.realPictureId(parseIntStrict(args[0])));
+        if (picture) {
+            picture.setAngleDirect(parseIntStrict(args[1]));
+        } else {
+            throw new Error('指定された番号[' + args[0] + ']のピクチャは無効です。');
+        }
+    };
+    Game_Interpreter.prototype.pluginCommandBook_Angle_Picture = function(args) {
+        this.pluginCommandBook_ピクチャの回転角設定(args);
+    };
+
     /*
      * ここからはプラグインコマンドの実装のために必要な関数などを追加する
      */
@@ -753,14 +985,196 @@
         })();
     }
 
+    //=============================================================================
+    // Gameクラス定義領域
+    //=============================================================================
     var _Game_System_initialize = Game_System.prototype.initialize;
     Game_System.prototype.initialize = function() {
         _Game_System_initialize.call(this);
         this._mapTouchDisable = false;
     };
 
+    var _Game_Message_initialize= Game_Message.prototype.initialize;
+    Game_Message.prototype.initialize = function() {
+        _Game_Message_initialize.call(this);
+        this._numInputBackground = 0;
+        this._numInputPositionType = 1;
+        this._numInputValidDigit = 1;
+        this.clearNumInputRange();
+    };
+
+    Game_Message.prototype.clearNumInputRange = function() {
+        this._numInputMaxValue = Infinity;
+        this._numInputMinValue = -Infinity;
+        this._numInputValidDigit = 1;
+    };
+
+    Game_Message.prototype.setNumInputRange = function(min, max) {
+        this._numInputMaxValue = max;
+        this._numInputMinValue = min;
+    };
+
+    Game_Message.prototype.setNumInputBackground = function(background) {
+        this._numInputBackground = background;
+    };
+
+    Game_Message.prototype.setNumInputPositionType = function(positionType) {
+        this._numInputPositionType = positionType;
+    };
+
+    Game_Message.prototype.numInputBackground = function() {
+        return this._numInputBackground;
+    };
+
+    Game_Message.prototype.numInputPositionType = function() {
+        return this._numInputPositionType;
+    };
+
+    var _Game_Screen_clearPictures = Game_Screen.prototype.clearPictures;
+    Game_Screen.prototype.clearPictures = function() {
+        _Game_Screen_clearPictures.call(this);
+        this._needsSortPictures = false;
+    };
+
+    var _Game_Picture_initBasic = Game_Picture.prototype.initBasic;
+    Game_Picture.prototype.initBasic = function() {
+        _Game_Picture_initBasic.call(this);
+        this._frameX      = 0;
+        this._frameY      = 0;
+        this._frameWidth  = 0;
+        this._frameHeight = 0;
+        this.z            = 100;
+    };
+
+    Game_Picture.prototype.setZ = function(value) {
+        this.z = value;
+    };
+
+    Game_Picture.prototype.setFrameDirect = function(x, y, width, height) {
+        this._frameX = x;
+        this._frameY = y;
+        this._frameWidth = width;
+        this._frameHeight = height;
+    };
+
+    Game_Picture.prototype.isValidFrame = function() {
+        return this._frameX + this._frameY + this._frameWidth + this._frameHeight > 0;
+    };
+
+    Game_Picture.prototype.setAngleDirect = function(value) {
+        this._rotationSpeed = 0;
+        this._angle = value % 360;
+    };
+
+    //=============================================================================
+    // Sceneクラス定義領域
+    //=============================================================================
     var _Scene_Map_isMapTouchOk = Scene_Map.prototype.isMapTouchOk;
     Scene_Map.prototype.isMapTouchOk = function() {
         return (!$gameSystem._mapTouchDisable || $gameTemp.isDestinationValid()) && _Scene_Map_isMapTouchOk.call(this);
     };
+
+    //=============================================================================
+    // Windowクラス定義領域
+    //=============================================================================
+    var _Window_NumberInput_refresh = Window_NumberInput.prototype.refresh;
+    Window_NumberInput.prototype.refresh = function() {
+        if (this._number != null) this._number = this._number.clamp(
+            $gameMessage._numInputMinValue, $gameMessage._numInputMaxValue);
+        _Window_NumberInput_refresh.call(this);
+    };
+
+    var _Window_NumberInput_start = Window_NumberInput.prototype.start;
+    Window_NumberInput.prototype.start = function() {
+        _Window_NumberInput_start.call(this);
+        this.updateBackground();
+    };
+
+    var _Window_NumberInput_processOk = Window_NumberInput.prototype.processOk;
+    Window_NumberInput.prototype.processOk = function() {
+        _Window_NumberInput_processOk.call(this);
+        $gameMessage.clearNumInputRange();
+    };
+
+    var _Window_NumberInput_updatePlacement = Window_NumberInput.prototype.updatePlacement;
+    Window_NumberInput.prototype.updatePlacement = function() {
+        _Window_NumberInput_updatePlacement.call(this);
+        var positionType = $gameMessage.numInputPositionType();
+        this.width = this.windowWidth();
+        switch (positionType) {
+            case 0:
+                this.x = 0;
+                break;
+            case 1:
+                this.x = (Graphics.boxWidth - this.width) / 2;
+                break;
+            case 2:
+                this.x = Graphics.boxWidth - this.width;
+                break;
+        }
+    };
+
+    var _Window_NumberInput_changeDigit = Window_NumberInput.prototype.changeDigit;
+    Window_NumberInput.prototype.changeDigit = function(up) {
+        if (this.maxItems() - this.index() < $gameMessage._numInputValidDigit) {
+            return;
+        }
+        _Window_NumberInput_changeDigit.apply(this, arguments);
+    };
+
+    Window_NumberInput.prototype.updateBackground = function() {
+        this._background = $gameMessage.numInputBackground();
+        this.setBackgroundType(this._background);
+    };
+
+    //=============================================================================
+    // Spriteクラス定義領域
+    //=============================================================================
+    var _Sprite_Picture_initialize = Sprite_Picture.prototype.initialize;
+    Sprite_Picture.prototype.initialize = function(pictureId) {
+        _Sprite_Picture_initialize.apply(this, arguments);
+        this.z = 0;
+    };
+
+    var _Sprite_Picture_update = Sprite_Picture.prototype.update;
+    Sprite_Picture.prototype.update = function() {
+        _Sprite_Picture_update.call(this);
+        if (this.visible) {
+            var newZ = this.picture().z;
+            if (newZ != this.z) {
+                this.z = newZ;
+                $gameScreen._needsSortPictures = true;
+            }
+            this.updateFrame();
+        }
+    };
+
+    Sprite_Picture.prototype.updateFrame = function() {
+        if (this.picture().isValidFrame()) {
+            var p = this.picture();
+            this.setFrame(p._frameX, p._frameY, p._frameWidth, p._frameHeight);
+        }
+    };
+
+    var _Spriteset_Base_update = Spriteset_Base.prototype.update;
+    Spriteset_Base.prototype.update = function() {
+        _Spriteset_Base_update.call(this);
+        if ($gameScreen._needsSortPictures) {
+            this.sortPictures();
+            $gameScreen._needsSortPictures = false;
+        }
+    };
+
+    Spriteset_Base.prototype.sortPictures = function() {
+        this._pictureContainer.children.sort(this._comparePictureChildOrder.bind(this));
+    };
+
+    Spriteset_Base.prototype._comparePictureChildOrder = function(a, b) {
+        if (a.z !== b.z) {
+            return a.z - b.z;
+        } else {
+            return a._pictureId - b._pictureId;
+        }
+    };
+
 })();
