@@ -33,7 +33,7 @@
  *
  * ■パラメータについて
  * プラグインコマンドの右に空白をつけてパラメータを追記することができます。
- * パラメータは数字、英数字、日本語、記号など以外にも以下の制御文字が使えます
+ * パラメータは数字、英数字、日本語、記号など以外にも以下のような制御文字が使えます。
  * （各数字部分には全角数字も使えます）
  * \V[n] 変数n番目の値に置き換えられます
  * \N[n] アクターn番の名前に置き換えられます
@@ -42,7 +42,11 @@
  * \In[n] アイテムn番の名前に置き換えられます
  * \Ip[n] アイテムn番の価格に置き換えられます
  * \Sn[n] スキルn番の名前に置き換えられます
- *
+ * \Js[X] XをJavaScriptとして評価した値に置き換えられます
+ * 
+ * その他使用可能な制御文字については、下記シートを参照してください。
+ * https://docs.google.com/spreadsheets/d/1rOIzDuhLC6IqJPEFciYOmXWL_O7X9-hMValMs7DpWCk/
+ * 
  * ■プラグインコマンド
  *
  * ===========================================================================
@@ -229,13 +233,14 @@
  *  引数4：値の型(省略可) [数字優先(省略値)：0  文字優先:1]
  *
  * 使用例：
- *   変数の操作 #0001 += \V[2] //変数1に変数2の値を加算
- *   変数の操作 \V[2] = \V[3]  //変数2の値と同番号の変数に変数3の値を代入
- *   変数の操作 1 mod \V[2]    //変数1を変数2の値で除算した余りを代入
- *   変数の操作 1 = \In[\V[2]] //変数1に変数2のアイテム番号の名前を代入
- *   変数の操作 #0001 = 10 1   //変数1に'10'(文字)を代入
- *   ControlVariable 1 += 2    //変数1に2を加算
- *   ConVar 1 mult \V[5]       //変数1を変数5の値で乗算
+ *   変数の操作 #0001 += \V[2]         //変数1に変数2の値を加算
+ *   変数の操作 \V[2] = \V[3]          //変数2の値と同番号の変数に変数3の値を代入
+ *   変数の操作 1 mod \V[2]            //変数1を変数2の値で除算した余りを代入
+ *   変数の操作 1 = \In[\V[2]]         //変数1に変数2のアイテム番号の名前を代入
+ *   変数の操作 #0001 = 10 1           //変数1に'10'(文字)を代入
+ *   変数の操作 5 = \Js[$dataMap.note] //変数5に個別マップのメモを代入
+ *   ControlVariable 1 += 2            //変数1に2を加算
+ *   ConVar 1 mult \V[5]               //変数1を変数5の値で乗算
  *
  * ===========================================================================
  * タッチ座標の取得(English:Get_Touch_Info)
@@ -456,11 +461,44 @@
             text = text.replace(/\x1bIn\[([０-９\d]+)\]/gi, function() {
                 return $dataItems[parseInt(wstringToString(arguments[1]), 10)].name;
             }.bind(this));
+            text = text.replace(/\x1bNi\[([０-９\d]+)\]/gi, function() {
+                return $dataItems[parseInt(wstringToString(arguments[1]), 10)].name;
+            }.bind(this));
             text = text.replace(/\x1bIp\[([０-９\d]+)\]/gi, function() {
+                return $dataItems[parseInt(wstringToString(arguments[1]), 10)].price;
+            }.bind(this));
+            text = text.replace(/\x1bPi\[([０-９\d]+)\]/gi, function() {
                 return $dataItems[parseInt(wstringToString(arguments[1]), 10)].price;
             }.bind(this));
             text = text.replace(/\x1bSn\[([０-９\d]+)\]/gi, function() {
                 return $dataSkills[parseInt(wstringToString(arguments[1]), 10)].name;
+            }.bind(this));
+            text = text.replace(/\x1bNs\[([０-９\d]+)\]/gi, function() {
+                return $dataSkills[parseInt(wstringToString(arguments[1]), 10)].name;
+            }.bind(this));
+            text = text.replace(/\x1bNc\[([０-９\d]+)\]/gi, function() {
+                return $dataClasses[parseInt(wstringToString(arguments[1]), 10)].name;
+            }.bind(this));
+            text = text.replace(/\x1bNt\[([０-９\d]+)\]/gi, function() {
+                return $dataStates[parseInt(wstringToString(arguments[1]), 10)].name;
+            }.bind(this));
+            text = text.replace(/\x1bNw\[([０-９\d]+)\]/gi, function() {
+                return $dataWeapons[parseInt(wstringToString(arguments[1]), 10)].name;
+            }.bind(this));
+            text = text.replace(/\x1bNa\[([０-９\d]+)\]/gi, function() {
+                return $dataArmors[parseInt(wstringToString(arguments[1]), 10)].name;
+            }.bind(this));
+            text = text.replace(/^\x1bJs\[(.*)\]$/gi, function() {
+                try{
+                    var value = eval(arguments[1]);
+                    if (value != null){return value}else{
+                        console.log('制御文字 \\JS のパラメータでエラー  詳細：評価値が無い(null or undefined)');
+                        return 0;
+                    }
+                } catch(ex){
+                    console.log( '制御文字 \\JS のパラメータでエラー  詳細： ' + ex.toString());
+                    return 0;
+                }
             }.bind(this));
         }
         text = text.replace(/\x1bG/gi, TextManager.currencyUnit);
