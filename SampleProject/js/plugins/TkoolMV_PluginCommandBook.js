@@ -428,21 +428,16 @@
 
 (function(){
     'use strict';
-
-    /*
-     * 全角数字を半角数字に変換する
-     */
-    var wstringToString = function(text) {
-        text = text.replace(/[０-９]/g, function(c) {
-            return String.fromCharCode(c.charCodeAt(0) - 0xFEE0);
-        });
-        return text;
-    };
-
-    /*
-     * 制御文字の拡張
-     */
-    var unescape = function(text) {
+    
+    //制御文字の拡張
+    Game_Interpreter.prototype.pluginCommandBook_unescape = function(text) {
+        //全角数字を半角数字に変換する
+        var wstringToString = function(text) {
+            text = text.replace(/[０-９]/g, function(c) {
+                return String.fromCharCode(c.charCodeAt(0) - 0xFEE0);
+            });
+            return text;
+        };
         var prevText = "";
         text = text.replace(/\\/g, '\x1b');
         while (prevText != text) {
@@ -488,7 +483,7 @@
             text = text.replace(/\x1bNa\[([０-９\d]+)\]/gi, function() {
                 return $dataArmors[parseInt(wstringToString(arguments[1]), 10)].name;
             }.bind(this));
-            text = text.replace(/^\x1bJs\[(.*)\]$/gi, function() {
+            text = text.replace(/\x1bJs\[(.*)\]\x1bJs/gi, function() {
                 try{
                     var value = eval(arguments[1]);
                     if (value != null){return value}else{
@@ -551,7 +546,7 @@
         if (typeof this[methodName] === 'function') {
             // 引数パラメータの制御文字での変換
             for (var i=0; i<args.length; i++) {
-                args[i] = unescape(args[i]);
+                args[i] = Game_Interpreter.prototype.pluginCommandBook_unescape(args[i]);
             }
             try {
                 this[methodName](args);
@@ -1017,7 +1012,7 @@
         (function () {
             var Window_Base_convertEscapeCharacters = Window_Base.prototype.convertEscapeCharacters;
             Window_Base.prototype.convertEscapeCharacters = function(text) {
-                text = unescape(text);
+                text = Game_Interpreter.prototype.pluginCommandBook_unescape(text);
                 return Window_Base_convertEscapeCharacters.call(this, text);
             };
         })();
