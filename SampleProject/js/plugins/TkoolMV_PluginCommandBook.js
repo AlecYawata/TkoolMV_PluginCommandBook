@@ -42,9 +42,9 @@
  * \In[n] アイテムn番の名前に置き換えられます
  * \Ip[n] アイテムn番の価格に置き換えられます
  * \Sn[n] スキルn番の名前に置き換えられます
- * \Js[X] XをJavaScriptとして評価した値に置き換えられます
+ * \Js[X]\Js XをJavaScriptとして評価した値に置き換えられます
  * 
- * その他使用可能な制御文字については、下記シートを参照してください。
+ * その他使用可能な制御文字や、\Js[X]\Jsで使えるスクリプトについては、下記シートを参照してください。
  * https://docs.google.com/spreadsheets/d/1rOIzDuhLC6IqJPEFciYOmXWL_O7X9-hMValMs7DpWCk/
  * 
  * ■プラグインコマンド
