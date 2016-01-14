@@ -423,6 +423,126 @@
  *  使用例
  *  ピクチャの回転角設定 1 90
  *  Trimming_Picture \v[1] \v[2]
+ * * ===========================================================================
+ * 文字の連結(English：ConcatenStrings)
+ * 文字を連結し、指定の変数に代入します。
+ * 変数の指定について、イベントエディタのコマンドと同じ#0001なども使用できます。
+ * もちろん\[V]や\JS[X]\JSなどの制御文字も使用可能です。
+ * プラグインコマンドで[文字の連結]もしくは[ConcatenStrings]か[CatStr]を記述して使用します。
+ * 
+ * パラメータ：
+ *  引数1：結果を代入する変数
+ *  引数2：連結する文字1
+ *  引数3：連結する文字2
+ *  引数4：結果が数値として評価できる場合(省略可)
+ *         [0:文字として評価(省略値)  1：数値として評価]
+ * 使用例
+ *  文字の連結 1 /N[1] は天才！ //ハロルドは天才！
+ *  文字の連結 #0001 \JS[$dataMapInfos[1].name]\JS は綺麗 //王都は綺麗
+ *  ConcatenStrings 1 TEST OK //TESTOK
+ *  CatStr 1 2 1 1 // 21(数値)
+ * ===========================================================================
+ * 文字の置換(English：ReplaceStrings)
+ * 文字を置換し、指定の変数に代入します。
+ * 変数の指定について、イベントエディタのコマンドと同じ#0001なども使用できます。
+ * もちろん\[V]や\JS[X]\JSなどの制御文字も使用可能です。
+ * 特殊文字\と置き換えることにより、指定文字の削除も可能です。
+ * プラグインコマンドで[文字の置換]もしくは[ReplaceStrings]か[RepStr]を記述して使用します。
+ * 
+ * パラメータ：
+ *  引数1：結果を代入する変数
+ *  引数2：置換対象の文字列
+ *  引数3：置換前文字
+ *  引数4：置換後文字
+ *  引数5：置換方法(省略可) [前方 後方 全て(省略値)]
+ *                                 or
+ *                          [front back all(省略値)]
+ * 使用例
+ *  文字列の置換 1 ハロルドかっこいいよハロルド ハ Ｈ 全て //ＨロルドかっこいいよＨロルド
+ *  文字列の置換 1 \V[1] ハロルド \ 全て //変数1の文字列からハロルドを取り除く
+ *  ReplaceStrings 1 ハロルドとハロルドがお見合い ハ Ｈ Front //Ｈロルドとハロルドがお見合い
+ *  RepStr 1 ハロルドとハロルドがお見合い ハロルド Ｔレーゼ Back //ハロルドとＴレーゼがお見合い
+ * ===========================================================================
+ * 文字の切取(English：CutString)
+ * 文字を切り取って指定の変数に代入します。
+ * 変数の指定について、イベントエディタのコマンドと同じ#0001なども使用できます。
+ * もちろん\[V]や\JS[X]\JSなどの制御文字も使用可能です。
+ * プラグインコマンドで[文字の切取]もしくは[CutStrings]か[CutStr]を記述して使用します。
+ * 
+ * パラメータ：
+ *  引数1：結果を代入する変数
+ *  引数2：対象の文字列
+ *  引数3：開始位置
+ *  引数4：終了位置(End か 最後 の指定で最後まで切り取り)
+ *  引数5：開始方向(省略可)[前方(省略値)  後方]
+ *                                 or
+ *                         [front(省略値) back]
+ * 使用例
+ *  文字の切取 1 \JS[$dataMap.note]\JS 1 10 前方
+ *  文字の切取 1 \JS[$dataMap.note]\JS 10 最後 後方
+ *  CutStrings 1 \[V] 2 end back
+ *  CutStr 1 \[V] 2 
+ * ===========================================================================
+ * 文字一致カウント(English：CountMatchString)
+ * 文字列内で特定の文字に一致した数をカウントし指定の変数に代入します。
+ * 変数の指定について、イベントエディタのコマンドと同じ#0001なども使用できます。
+ * もちろん\[V]や\JS[X]\JSなどの制御文字も使用可能です。
+ * プラグインコマンドで[文字一致カウント]もしくは[CountMatchString]か[CntStr]を記述して使用します。
+ * 
+ * パラメータ：
+ *  引数1：結果を代入する変数
+ *  引数2：対象の文字列
+ *  引数3：検索する文字
+ *  引数4：比較方法[0:一致したら一致下部分から先を比較(省略値) 1:1文字ずつ比較]
+ * 使用例
+ *  文字一致カウント 1 あああああ ああ 0 //2文字一致
+ *  文字一致カウント 1 あああああ ああ 1 //4文字一致
+ *  CountMatchString 1 \[V] OK
+ *  CntStr 1 \N[1] Ｈロルド 0
+ * ===========================================================================
+ * 文字の検索(English：CountMatchString)
+ * 文字列内で特定の文字を検索し、最初に一致した位置を指定の変数に代入します。
+ * 変数の指定について、イベントエディタのコマンドと同じ#0001なども使用できます。
+ * もちろん\[V]や\JS[X]\JSなどの制御文字も使用可能です。
+ * プラグインコマンドで[文字の探索]もしくは[SearchString]か[SchStr]を記述して使用します。
+ * 
+ * パラメータ：
+ *  引数1：結果を代入する変数
+ *  引数2：対象の文字列
+ *  引数3：検索する文字
+ *  引数4：開始方向(省略可)[前方(省略値)  後方]
+ *                                 or
+ *                         [front(省略値) back]
+ * 使用例
+ *  文字の探索 1 あああああ ああ 前方
+ *  SearchString 1 \[V] test back
+ *  SchStr 1 \N[1] Ｈロルド
+ * ===========================================================================
+ * 文字数カウント(English：CountStringlength)
+ * 文字数をカウントし指定の変数に代入します。
+ * 変数の指定について、イベントエディタのコマンドと同じ#0001なども使用できます。
+ * もちろん\[V]や\JS[X]\JSなどの制御文字も使用可能です。
+ * プラグインコマンドで[文字の探索]もしくは[CountStringlength]か[CntLen]を記述して使用します。
+ * 
+ * パラメータ：
+ *  引数1：結果を代入する変数
+ *  引数2：対象の文字列
+ * 
+ * 使用例
+ *  文字数カウント 1 \N[1]
+ *  CountStringlength 1 hahaha
+ *  CntLen 1 
+ * ===========================================================================
+ * 文字の反転(English：ReverseString)
+ * 対象の文字列を逆転させ、指定の変数に代入します。
+ * 変数の指定について、イベントエディタのコマンドと同じ#0001なども使用できます。
+ * もちろん\[V]や\JS[X]\JSなどの制御文字も使用可能です。
+ * プラグインコマンドで[文字の探索]もしくは[CountStringlength]か[CntLen]を記述して使用します。
+ * パラメータ：
+ *  引数1：結果を代入する変数
+ *  引数2：対象の文字列
+ * 
+ * 
  * ===========================================================================
  */
 
@@ -498,16 +618,14 @@
         }
         text = text.replace(/\x1bG/gi, TextManager.currencyUnit);
         return text;
-    };
-
-    var getActorName = function(n) {
-        var actor = n >= 1 ? $gameActors.actor(n) : null;
-        return actor ? actor.name() : '';
-    };
-
-    var getPartyMemberName = function(n) {
-        var actor = n >= 1 ? $gameParty.members()[n - 1] : null;
-        return actor ? actor.name() : '';
+        var getActorName = function(n) {
+            var actor = n >= 1 ? $gameActors.actor(n) : null;
+            return actor ? actor.name() : '';
+        };
+        var getPartyMemberName = function(n) {
+            var actor = n >= 1 ? $gameParty.members()[n - 1] : null;
+            return actor ? actor.name() : '';
+        };
     };
 
     /**
@@ -774,49 +892,53 @@
 
     Game_Interpreter.prototype.pluginCommandBook_変数の操作 = function(args) {
         args[0]=args[0].replace('#' ,'');
-        var VarId1   = parseInt(args[0],10);
-
+        args[1]=args[1].replace(/set/i,'=');
+        args[1]=args[1].replace(/add/i,'+=');
+        args[1]=args[1].replace(/sub/i,'-=');
+        args[1]=args[1].replace(/mult/i,'*=');
+        args[1]=args[1].replace(/div/i,'/=');
+        args[1]=args[1].replace(/mod/i,'%=');
+        var VarId1 = parseIntStrict(args[0]);
         if(isFinite(args[2]) && args[3]!='1'){
             var Var1 = parseInt(args[2],10);
         } else {
             var Var1 = args[2];
         }
         var Var2 = $gameVariables.value(VarId1);
-        if (!isFinite(VarId1)) return;
-        args[1]=args[1].replace('set','=');
-        args[1]=args[1].replace('add','+=');
-        args[1]=args[1].replace('sub','-=');
-        args[1]=args[1].replace('mult','*=');
-        args[1]=args[1].replace('div','/=');
-        args[1]=args[1].replace('mod','%=');
-        if (args[1]=='=') {
+        switch (args[1]) {
+          case '=':
             $gameVariables.setValue(VarId1,Var1);
-        }
-        if (!isFinite(Var1)) return;
-        if (!isFinite(Var2)) return;
-        Var1 = parseInt(Var1,10);
-        Var2 = parseInt(Var2,10);
-        if (args[1]=='+=') {
+            break;
+          case '+=':
             $gameVariables.setValue(VarId1,Var2+Var1);
-        }
-        if (args[1]=='-=') {
+            break;
+          case '-=':
+            Var1 =parseIntStrict(Var1);
+            Var2 = parseIntStrict(Var2);
             $gameVariables.setValue(VarId1,Var2-Var1);
-        }
-        if (args[1]=='*=') {
+            break;
+          case '*=':
+            Var1 =parseIntStrict(Var1);
+            Var2 = parseIntStrict(Var2);
             $gameVariables.setValue(VarId1,Var2*Var1);
-        }
-        if (args[1]=='/=') {
+            break; 
+          case '/=':
+            Var1 =parseIntStrict(Var1);
+            Var2 = parseIntStrict(Var2);
             $gameVariables.setValue(VarId1,(Var2-(Var2%Var1))/Var1);
-        }
-        if (args[1]=='%=') {
+            break;
+          case '%=':
+            Var1 =parseIntStrict(Var1);
+            Var2 = parseIntStrict(Var2);
             $gameVariables.setValue(VarId1,Var2%Var1);
+            break;
         }
     };
     Game_Interpreter.prototype.pluginCommandBook_ControlVariable = function(args) {
-        this.pluginCommandBook_変数の操作();
+        this.pluginCommandBook_変数の操作(args);
     };
     Game_Interpreter.prototype.pluginCommandBook_ConVar = function(args) {
-        this.pluginCommandBook_変数の操作();
+        this.pluginCommandBook_変数の操作(args);
     };
 
     Game_Interpreter.prototype.pluginCommandBook_タッチ座標の取得 = function(args) {
@@ -995,6 +1117,174 @@
     Game_Interpreter.prototype.pluginCommandBook_Angle_Picture = function(args) {
         this.pluginCommandBook_ピクチャの回転角設定(args);
     };
+
+    Game_Interpreter.prototype.pluginCommandBook_文字の連結 = function(args) {
+        args[0]=args[0].replace('#' ,'');
+        var VarId1 = parseIntStrict(args[0]);
+        var Str = String(args[1]) + String(args[2]);
+        if(isFinite(Str) && args[3] == '1') Str = parseInt(Str,10);
+        $gameVariables.setValue(VarId1,Str);
+    };
+    Game_Interpreter.prototype.pluginCommandBook_ConcatenStrings = function(args) {
+        this.pluginCommandBook_文字の連結(args);
+    };
+    Game_Interpreter.prototype.pluginCommandBook_CatStr = function(args) {
+        this.pluginCommandBook_文字の連結(args);
+    };
+
+    Game_Interpreter.prototype.pluginCommandBook_文字の置換 = function(args) {
+        args[0]=args[0].replace('#' ,'');
+        var VarId1   = parseInt(args[0],10);
+        VarId1 = parseIntStrict(VarId1);
+        var Str = String(args[1]);
+        var Str2 = String(args[2]);
+        var Str3 = String(args[3]);
+        Str = Str.replace(/\x1b/gi);
+        Str2 = Str2.replace(/\x1b/gi);
+        Str3 = Str3.replace(/\x1b/gi);
+        if (args[4] == null) args[4] = '全て';
+        args[4]=args[4].replace(/front/i,'前方');
+        args[4]=args[4].replace(/back/i,'後方');
+        args[4]=args[4].replace(/all/i,'全て');
+        switch (args[4]){
+          case '前方':
+            Str = Str.replace(Str2,Str3);
+            break;
+          case '後方':
+            Str = RvStr(Str);
+            Str2 = RvStr(Str2);
+            Str3 = RvStr(Str3);
+            Str = Str.replace(Str2,Str3);
+            Str = RvStr(Str);
+            break;
+          case '全て':
+          default:               
+            while (Str.indexOf(Str2,0) != -1 ) Str = Str.replace(Str2,Str3); 
+            break;
+        }
+        $gameVariables.setValue(VarId1,Str);
+        function RvStr(st) {
+            var rv = "";
+            for (var i = 0, n = st.length; i < n; i++) rv += st[n - i - 1];
+            return rv;
+        }
+    };
+    Game_Interpreter.prototype.pluginCommandBook_ReplaceStrings = function(args) {
+        this.pluginCommandBook_文字の置換(args);
+    };
+    Game_Interpreter.prototype.pluginCommandBook_RepStr = function(args) {
+        this.pluginCommandBook_文字の置換(args);
+    };
+
+    Game_Interpreter.prototype.pluginCommandBook_文字の切取 = function(args) {
+        args[0]=args[0].replace('#' ,'');
+        var VarId1 = parseIntStrict(args[0]);
+        var Str = String(args[1]);
+        var Nm1 = parseIntStrict(args[2]);
+        var Nm2 = args[3]
+        if (Nm2.toLowerCase() == 'end' || Nm2 == '最後' ) Nm2 = Str.length;
+        var Nm2 = parseIntStrict(Nm2);
+        if (args[4] == null) args[4] = '前方';
+        args[4]=args[4].replace(/front/i,'前方');
+        args[4]=args[4].replace(/back/i,'後方');
+        switch (args[4]){
+          case '前方':
+          default:
+            Str = Str.substring(Nm1-1,Nm1+Nm2-1);
+            break;
+          case '後方':
+            Str = Str.substring(Str.length-Nm1+1,Str.length-Nm1-Nm2+1);
+            break;
+        }
+        $gameVariables.setValue(VarId1,Str);
+    };
+    Game_Interpreter.prototype.pluginCommandBook_CutStrings = function(args) {
+        this.pluginCommandBook_文字の切取(args);
+    };
+    Game_Interpreter.prototype.pluginCommandBook_CutStr = function(args) {
+        this.pluginCommandBook_文字の切取(args);
+    };
+    Game_Interpreter.prototype.pluginCommandBook_文字一致カウント = function(args) {
+        args[0]=args[0].replace('#' ,'');
+        var VarId1 = parseIntStrict(args[0]);
+        var Str = String(args[1]);
+        var Str2 = String(args[2]);
+        var StrCnt = 0
+        var StrLen
+        if (args[3] == '1') {
+          StrCnt = (Str.match(new RegExp(Str2, "g"))||[]).length;
+        } else {
+          while (Str.indexOf(Str2,0) != -1 ){
+          StrCnt ++
+          StrLen = Str.indexOf(Str2,0) + 1
+          Str = Str.substring(StrLen,Str.length);
+          }
+        }
+        $gameVariables.setValue(VarId1,StrCnt);
+    };
+    Game_Interpreter.prototype.pluginCommandBook_CountMatchString = function(args) {
+        this.pluginCommandBook_文字一致カウント(args);
+    }; 
+    Game_Interpreter.prototype.pluginCommandBook_CntStr = function(args) {
+        this.pluginCommandBook_文字一致カウント(args);
+    };
+
+    Game_Interpreter.prototype.pluginCommandBook_文字の検索 = function(args) {
+        args[0]=args[0].replace('#' ,'');
+        var VarId1 = parseIntStrict(args[0]);
+        var Str = String(args[1]);
+        var Str2 = String(args[2]);
+        var StrLen
+        if (args[3] == null) args[4] = '前方';
+        args[3]=args[3].replace(/front/i,'前方');
+        args[3]=args[3].replace(/back/i,'後方');
+        switch (args[3]){
+          case '前方':
+          default:
+            StrLen = Str.indexOf(Str2) + 1
+            break;
+          case '後方':
+            StrLen = Str.lastIndexOf(Str2) + 1
+            break;
+        }
+        $gameVariables.setValue(VarId1,StrLen);
+   };
+   Game_Interpreter.prototype.pluginCommandBook_SearchString = function(args) {
+        this.pluginCommandBook_文字の検索(args);
+   };
+   Game_Interpreter.prototype.pluginCommandBook_SchStr = function(args) {
+        this.pluginCommandBook_文字の検索(args);
+   };
+   
+   Game_Interpreter.prototype.pluginCommandBook_文字数カウント = function(args) {
+        args[0]=args[0].replace('#' ,'');
+        var VarId1 = parseIntStrict(args[0]);
+        var Str = String(args[1]);
+        var StrLen = Str.length
+        $gameVariables.setValue(VarId1,StrLen);
+   };
+   Game_Interpreter.prototype.pluginCommandBook_CountStringlength = function(args) {
+        this.pluginCommandBook_文字数カウント(args);
+   };
+   Game_Interpreter.prototype.pluginCommandBook_SchStr = function(args) {
+        this.pluginCommandBook_文字数カウント(args);
+   };
+   
+   Game_Interpreter.prototype.pluginCommandBook_文字の反転 = function(args) {
+        args[0]=args[0].replace('#' ,'');
+        var VarId1 = parseIntStrict(args[0]);
+        var Str = String(args[1]);
+        var RevStr = "";
+        for (var i = 0, n = Str.length; i < n; i++) RevStr += Str[n - i - 1];
+        $gameVariables.setValue(VarId1,RevStr);
+   };
+   
+ Game_Interpreter.prototype.pluginCommandBook_ReverseString = function(args) {
+        this.pluginCommandBook_文字の反転(args);
+   };
+ Game_Interpreter.prototype.pluginCommandBook_RevStr = function(args) {
+        this.pluginCommandBook_文字の反転(args);
+   };
 
     /*
      * ここからはプラグインコマンドの実装のために必要な関数などを追加する
