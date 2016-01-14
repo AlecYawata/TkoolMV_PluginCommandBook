@@ -142,3 +142,30 @@ RPGツクールMVの有志によるプラグインコマンド集
 「ピクチャの回転」とは異なり回転させた状態のまま保たれます。  
 製作者 トリアコンタン  
 
+- 「文字の連結(English：ConcatenStrings)」
+ 文字を連結し、指定の変数に代入します。
+ プラグインコマンドで[文字の連結]もしくは[ConcatenStrings]か[CatStr]を記述して使用します。
+ 
+- 「文字の置換(English：ReplaceStrings)」
+ 文字を置換し、指定の変数に代入します。
+ プラグインコマンドで[文字の置換]もしくは[ReplaceStrings]か[RepStr]を記述して使用します。
+
+- 「文字の切取(English：CutString」
+ 文字を切り取って指定の変数に代入します。
+ プラグインコマンドで[文字の切取]もしくは[CutStrings]か[CutStr]を記述して使用します。
+ 
+- 「文字一致カウント(English：CountMatchString)」
+ 文字列内で特定の文字に一致した数をカウントし指定の変数に代入します。
+ プラグインコマンドで[文字一致カウント]もしくは[CountMatchString]か[CntStr]を記述して使用します。
+ 
+- 「文字の検索(English：CountMatchString)」
+  文字列内で特定の文字を検索し、最初に一致した位置を指定の変数に代入します。
+  プラグインコマンドで[文字の検索]もしくは[SearchString]か[SchStr]を記述して使用します。
+  
+- 「文字数カウント(English：CountStringlength)」
+  文字数をカウントし指定の変数に代入します。
+  プラグインコマンドで[文字数カウント]もしくは[CountStringlength]か[CntLen]を記述して使用します。
+
+- 「文字の反転(English：ReverseString)」
+  対象の文字列を逆転させ、指定の変数に代入します。
+  プラグインコマンドで[文字の探索]もしくは[ReverseString]か[RevStr]を記述して使用します。
