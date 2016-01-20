@@ -18,6 +18,11 @@
  * Default: はい
  * @default はい
  *
+ * @param スクリプトに制御文字適用
+ * @desc スクリプト実行時に制御文字を使用できるようにするか(はい/いいえ)
+ * Default: いいえ
+ * @default いいえ
+ *
  * @help
  *  Copyright (c) 2015 Alec
  *  This software is released under the MIT License.
@@ -545,7 +550,47 @@
  *  文字の反転 1 \N[1]
  *  ReverseString 1 逆読みできるかな？
  *  RevStr 1 できると思うよ？
- * 
+ * ===========================================================================
+ * 強制セーブ(English：Force_Save)
+ *  セーブ画面を介さずに強制的に状態をセーブします。
+ *  更新されるセーブファイルは、最後にセーブ or ロードしたファイルになります。
+ *  ニューゲームから直接セーブした場合は空きを探しますが、空きがなければ
+ *  もっとも古いファイルを上書きします。
+ * パラメータ：
+ *  なし
+ * 使用例
+ *  強制セーブ
+ *  Force_Save
+ * ===========================================================================
+ * 指定位置にアニメーション表示(English：Show_Animation)
+ *  画面上の座標を指定してアニメーションを再生します。
+ * パラメータ：
+ *  引数1：X座標
+ *  引数2：Y座標
+ *  引数3：アニメーションID
+ *  引数4：ウェイトフラグ（指定する場合「ウェイトあり」）
+ * 使用例
+ *  指定位置にアニメーション表示 320 240 1 ウェイトあり
+ *  Show_Animation \v[1] \v[2] 1
+ * ===========================================================================
+ * 指定位置にループアニメーション表示(English：Show_Loop_Animation)
+ *  画面上の座標を指定してアニメーションを再生します。
+ *  消去するか新たなアニメーションを指定するまでループ再生されます。
+ * パラメータ：
+ *  引数1：X座標
+ *  引数2：Y座標
+ *  引数3：アニメーションID
+ * 使用例
+ *  指定位置にループアニメーション表示 320 240 1
+ *  Show_Loop_Animation \v[1] \v[2] 1
+ * ===========================================================================
+ * ループアニメーション消去(English：Erase_Loop_Animation)
+ *  ループ再生しているアニメーションを消去します。
+ * パラメータ：
+ *  なし
+ * 使用例
+ *  ループアニメーション消去
+ *  Erase_Loop_Animation
  * ===========================================================================
  */
 
@@ -560,6 +605,14 @@
                 return String.fromCharCode(c.charCodeAt(0) - 0xFEE0);
             });
             return text;
+        };
+        var getActorName = function(n) {
+            var actor = n >= 1 ? $gameActors.actor(n) : null;
+            return actor ? actor.name() : '';
+        };
+        var getPartyMemberName = function(n) {
+            var actor = n >= 1 ? $gameParty.members()[n - 1] : null;
+            return actor ? actor.name() : '';
         };
         var prevText = "";
         text = text.replace(/\\/g, '\x1b');
@@ -621,14 +674,6 @@
         }
         text = text.replace(/\x1bG/gi, TextManager.currencyUnit);
         return text;
-        var getActorName = function(n) {
-            var actor = n >= 1 ? $gameActors.actor(n) : null;
-            return actor ? actor.name() : '';
-        };
-        var getPartyMemberName = function(n) {
-            var actor = n >= 1 ? $gameParty.members()[n - 1] : null;
-            return actor ? actor.name() : '';
-        };
     };
 
     /**
@@ -1289,6 +1334,49 @@
         this.pluginCommandBook_文字の反転(args);
    };
 
+    Game_Interpreter.prototype.pluginCommandBook_強制セーブ = function(args) {
+        $gameSystem.onBeforeSave();
+        if (!DataManager.saveGame(DataManager.lastAccessedSavefileId())) {
+            throw new Error('！！！セーブに失敗しました。セーブファイルは消去されています。！！！');
+        }
+    };
+
+    Game_Interpreter.prototype.pluginCommandBook_Force_Save = function(args) {
+        this.pluginCommandBook_強制セーブ(args);
+    };
+
+    Game_Interpreter.prototype.pluginCommandBook_指定位置にアニメーション表示 = function(args) {
+        var x = parseIntStrict(args[0]);
+        var y = parseIntStrict(args[1]);
+        var id =  parseIntStrict(args[2]);
+        var wait = args[3] && (args[3] === 'ウェイトあり' || args[3].toUpperCase() === 'wait');
+        $gameScreen.startAnimation(x, y, id, false);
+        if (wait) this.wait($dataAnimations[id].frames.length * 4);
+    };
+
+    Game_Interpreter.prototype.pluginCommandBook_Show_Animation = function(args) {
+        this.pluginCommandBook_指定位置にアニメーション表示(args);
+    };
+
+    Game_Interpreter.prototype.pluginCommandBook_指定位置にループアニメーション表示 = function(args) {
+        var x = parseIntStrict(args[0]);
+        var y = parseIntStrict(args[1]);
+        var id =  parseIntStrict(args[2]);
+        $gameScreen.startAnimation(x, y, id, true);
+    };
+
+    Game_Interpreter.prototype.pluginCommandBook_Show_Loop_Animation = function(args) {
+        this.pluginCommandBook_指定位置にループアニメーション表示(args);
+    };
+
+    Game_Interpreter.prototype.pluginCommandBook_ループアニメーション消去 = function(args) {
+        $gameScreen.animationLoop = false;
+    };
+
+    Game_Interpreter.prototype.pluginCommandBook_Erase_Loop_Animation = function(args) {
+        this.pluginCommandBook_ループアニメーション消去(args);
+    };
+
     /*
      * ここからはプラグインコマンドの実装のために必要な関数などを追加する
      */
@@ -1300,13 +1388,44 @@
      *  このプラグインで使っている制御文字の拡張を通常のウィンドウにも適用します
      *  製作者 Alec
      */
-    console.log(eval(String(parameters['制御文字の拡張']||'false')));
     if (eval(String(parameters['制御文字の拡張']||'false'))) {
         (function () {
             var Window_Base_convertEscapeCharacters = Window_Base.prototype.convertEscapeCharacters;
             Window_Base.prototype.convertEscapeCharacters = function(text) {
                 text = Game_Interpreter.prototype.pluginCommandBook_unescape(text);
                 return Window_Base_convertEscapeCharacters.call(this, text);
+            };
+        })();
+    }
+
+    if (eval(String(parameters['スクリプトに制御文字適用']||'false'))) {
+        (function () {
+            var _Game_Interpreter_command355 = Game_Interpreter.prototype.command355;
+            Game_Interpreter.prototype.command355 = function() {
+                try {
+                    this._list[this._index].parameters[0] =
+                        this.pluginCommandBook_unescape(this._list[this._index].parameters[0]);
+                    var i = 0;
+                    while (this._list[this._index + ++i].code === 655) {
+                        this._list[this._index + i].parameters[0] =
+                            this.pluginCommandBook_unescape(this._list[this._index + i].parameters[0]);
+                    }
+                    return _Game_Interpreter_command355.apply(this, arguments);
+                } catch(e) {
+                    if ($gameTemp.isPlaytest() && Utils.isNwjs()) {
+                        var window = require('nw.gui').Window.get();
+                        if (!window.isDevToolsOpen()) {
+                            var devTool = window.showDevTools();
+                            devTool.moveTo(0, 0);
+                            devTool.resizeTo(Graphics.width, Graphics.height);
+                            window.focus();
+                        }
+                    }
+                    console.log('スクリプトの実行中にエラーが発生しました。');
+                    console.log('- スクリプト 　: ' + this.currentCommand().parameters[0]);
+                    console.log('- エラー原因   : ' + e.toString());
+                    return true;
+                }
             };
         })();
     }
@@ -1356,15 +1475,65 @@
         return this._numInputPositionType;
     };
 
+    var _Game_Screen_clear = Game_Screen.prototype.clear;
+    Game_Screen.prototype.clear = function() {
+        _Game_Screen_clear.apply(this, arguments);
+        this.clearAnimation();
+    };
+
+    Game_Screen.prototype.startAnimation = function(x, y, id, loop) {
+        this._animationContainerX = x;
+        this._animationContainerY = y;
+        this._animationId         = id;
+        this._animationLoop       = loop;
+    };
+
+    Game_Screen.prototype.clearAnimation = function() {
+        this._animationContainerX = 0;
+        this._animationContainerY = 0;
+        this._animationId         = 0;
+    };
+
+    Object.defineProperty(Game_Screen.prototype, 'animationContainerX', {
+        get: function() {
+            return this._animationContainerX;
+        },
+        configurable: false
+    });
+
+    Object.defineProperty(Game_Screen.prototype, 'animationContainerY', {
+        get: function() {
+            return this._animationContainerY;
+        },
+        configurable: false
+    });
+
+    Object.defineProperty(Game_Screen.prototype, 'animationId', {
+        get: function() {
+            return this._animationId;
+        },
+        configurable: false
+    });
+
+    Object.defineProperty(Game_Screen.prototype, 'animationLoop', {
+        get: function() {
+            return this._animationLoop;
+        },
+        set: function(value) {
+            this._animationLoop = value;
+        },
+        configurable: false
+    });
+
     var _Game_Screen_clearPictures = Game_Screen.prototype.clearPictures;
     Game_Screen.prototype.clearPictures = function() {
-        _Game_Screen_clearPictures.call(this);
-        this._needsSortPictures = false;
+        _Game_Screen_clearPictures.apply(this, arguments);
+        this.needsSortPictures = false;
     };
 
     var _Game_Picture_initBasic = Game_Picture.prototype.initBasic;
     Game_Picture.prototype.initBasic = function() {
-        _Game_Picture_initBasic.call(this);
+        _Game_Picture_initBasic.apply(this, arguments);
         this._frameX      = 0;
         this._frameY      = 0;
         this._frameWidth  = 0;
@@ -1407,24 +1576,24 @@
     Window_NumberInput.prototype.refresh = function() {
         if (this._number != null) this._number = this._number.clamp(
             $gameMessage._numInputMinValue, $gameMessage._numInputMaxValue);
-        _Window_NumberInput_refresh.call(this);
+        _Window_NumberInput_refresh.apply(this, arguments);
     };
 
     var _Window_NumberInput_start = Window_NumberInput.prototype.start;
     Window_NumberInput.prototype.start = function() {
-        _Window_NumberInput_start.call(this);
+        _Window_NumberInput_start.apply(this, arguments);
         this.updateBackground();
     };
 
     var _Window_NumberInput_processOk = Window_NumberInput.prototype.processOk;
     Window_NumberInput.prototype.processOk = function() {
-        _Window_NumberInput_processOk.call(this);
+        _Window_NumberInput_processOk.apply(this, arguments);
         $gameMessage.clearNumInputRange();
     };
 
     var _Window_NumberInput_updatePlacement = Window_NumberInput.prototype.updatePlacement;
     Window_NumberInput.prototype.updatePlacement = function() {
-        _Window_NumberInput_updatePlacement.call(this);
+        _Window_NumberInput_updatePlacement.apply(this, arguments);
         var positionType = $gameMessage.numInputPositionType();
         this.width = this.windowWidth();
         switch (positionType) {
@@ -1469,7 +1638,7 @@
             var newZ = this.picture().z;
             if (newZ != this.z) {
                 this.z = newZ;
-                $gameScreen._needsSortPictures = true;
+                $gameScreen.needsSortPictures = true;
             }
             this.updateFrame();
         }
@@ -1482,12 +1651,43 @@
         }
     };
 
+    var _Spriteset_Base_createUpperLayer = Spriteset_Base.prototype.createUpperLayer;
+    Spriteset_Base.prototype.createUpperLayer = function() {
+        _Spriteset_Base_createUpperLayer.apply(this, arguments);
+        this.createAnimationContainer();
+    };
+
+    Spriteset_Base.prototype.createAnimationContainer = function() {
+        this._animationContainer = new Sprite_Base();
+        this._animationId = 0;
+        this.addChild(this._animationContainer);
+    };
+
     var _Spriteset_Base_update = Spriteset_Base.prototype.update;
     Spriteset_Base.prototype.update = function() {
         _Spriteset_Base_update.call(this);
-        if ($gameScreen._needsSortPictures) {
+        if ($gameScreen.needsSortPictures) {
             this.sortPictures();
-            $gameScreen._needsSortPictures = false;
+            $gameScreen.needsSortPictures = false;
+        }
+        this.updateAnimationContainer();
+    };
+
+    Spriteset_Base.prototype.updateAnimationContainer = function() {
+        var id = $gameScreen.animationId;
+        if (id > 0 && id < $dataAnimations.length) {
+            this._animationContainer.x = $gameScreen.animationContainerX;
+            this._animationContainer.y = $gameScreen.animationContainerY;
+            this._animationContainer.startAnimation($dataAnimations[id], false, 0);
+            this._animationId = id;
+            $gameScreen.clearAnimation();
+        }
+        if (!this._animationContainer.isAnimationPlaying() && this._animationId > 0) {
+            if ($gameScreen.animationLoop) {
+                this._animationContainer.startAnimation($dataAnimations[this._animationId], false, 0);
+            } else {
+                this._animationId = 0;
+            }
         }
     };
 
