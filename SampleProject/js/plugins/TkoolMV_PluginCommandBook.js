@@ -1402,29 +1402,65 @@
         (function () {
             var _Game_Interpreter_command355 = Game_Interpreter.prototype.command355;
             Game_Interpreter.prototype.command355 = function() {
+                var oldParams = [], i = 0, result, index = this._index;
+                oldParams.push(this._list[index].parameters[0]);
+                this._list[index].parameters[0] = this.pluginCommandBook_unescape(this._list[index].parameters[0]);
+                while (this._list[index + ++i].code === 655) {
+                    oldParams.push(this._list[index + i].parameters[0]);
+                    this._list[index + i].parameters[0] = this.pluginCommandBook_unescape(this._list[index + i].parameters[0]);
+                }
                 try {
-                    this._list[this._index].parameters[0] =
-                        this.pluginCommandBook_unescape(this._list[this._index].parameters[0]);
-                    var i = 0;
-                    while (this._list[this._index + ++i].code === 655) {
-                        this._list[this._index + i].parameters[0] =
-                            this.pluginCommandBook_unescape(this._list[this._index + i].parameters[0]);
-                    }
-                    return _Game_Interpreter_command355.apply(this, arguments);
+                    result = _Game_Interpreter_command355.apply(this, arguments);
                 } catch(e) {
-                    if ($gameTemp.isPlaytest() && Utils.isNwjs()) {
-                        var window = require('nw.gui').Window.get();
-                        if (!window.isDevToolsOpen()) {
-                            var devTool = window.showDevTools();
-                            devTool.moveTo(0, 0);
-                            devTool.resizeTo(Graphics.width, Graphics.height);
-                            window.focus();
-                        }
-                    }
                     console.log('スクリプトの実行中にエラーが発生しました。');
                     console.log('- スクリプト 　: ' + this.currentCommand().parameters[0]);
                     console.log('- エラー原因   : ' + e.toString());
-                    return true;
+                    result = true;
+                }
+                this._list[index].parameters[0] = oldParams.shift();
+                i = 0;
+                while (this._list[index + ++i].code === 655) {
+                    this._list[index + i].parameters[0] = oldParams.shift();
+                }
+                return result;
+            };
+
+            var _Game_Interpreter_command111 = Game_Interpreter.prototype.command111;
+            Game_Interpreter.prototype.command111 = function() {
+                if (this._params[0] === 12) {
+                    var oldParam = this._params[1];
+                    var result;
+                    this._params[1] = this.pluginCommandBook_unescape(this._params[1]);
+                    try {
+                        result = _Game_Interpreter_command111.apply(this, arguments);
+                    } catch(e) {
+                        console.log('スクリプトの実行中にエラーが発生しました。');
+                        console.log('- スクリプト 　: ' + this._params[1]);
+                        console.log('- エラー原因   : ' + e.toString());
+                        result = true;
+                    }
+                    this._params[1] = oldParam;
+                } else {
+                    result = _Game_Interpreter_command111.apply(this, arguments);
+                }
+                return result;
+            };
+
+            var _Game_Character_processMoveCommand = Game_Character.prototype.processMoveCommand;
+            Game_Character.prototype.processMoveCommand = function(command) {
+                if (command.code === Game_Character.ROUTE_SCRIPT) {
+                    var oldParam = command.parameters[0];
+                    command.parameters[0] = Game_Interpreter.prototype.pluginCommandBook_unescape(command.parameters[0]);
+                    try {
+                        _Game_Character_processMoveCommand.apply(this, arguments);
+                    } catch(e) {
+                        console.log('スクリプトの実行中にエラーが発生しました。');
+                        console.log('- スクリプト 　: ' + command.parameters[0]);
+                        console.log('- エラー原因   : ' + e.toString());
+                    }
+                    command.parameters[0] = oldParam;
+                } else {
+                    _Game_Character_processMoveCommand.apply(this, arguments);
                 }
             };
         })();
